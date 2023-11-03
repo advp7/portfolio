@@ -20,7 +20,7 @@ import { Link } from "react-scroll";
 const Hero = () => {
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = `${process.env.PUBLIC_URL}/ADVAITH_RESUME.pdf`;
+    link.href = `${process.env.PUBLIC_URL}/CV_ADVAITH.pdf`;
     link.download = "Advaith_Resume.pdf";
     document.body.appendChild(link);
     link.click();
