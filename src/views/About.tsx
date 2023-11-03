@@ -48,7 +48,7 @@ const About = () => {
               create dynamic, user-friendly web interfaces. I am passionate
               about translating design concepts into responsive, engaging
               digital experiences, and I'm dedicated to staying at the forefront
-              of the latest trends to deliver high-quality results.
+              of the latest trends to deliver high quality results.
             </p>
           </Reveal>
 
