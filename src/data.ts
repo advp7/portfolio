@@ -14,33 +14,32 @@ export const projects = [
   },
   {
     id: 1,
-    category: "personal",
-    img: personalTwo,
-    title: "University Web Portal",
-  },
-
-  {
-    id: 2,
     category: "professional",
     img: webOne,
     title: "Suite Business Landing Page",
   },
   {
-    id: 3,
-    category: "personal",
-    img: webTwo,
-    title: "Restaurant & Dishes Listing Page",
-  },
-  {
-    id: 4,
+    id: 2,
     category: "professional",
     img: webThree,
     title: "Product Feedback Flow",
   },
   {
-    id: 4,
+    id: 3,
     category: "personal",
     img: personalOne,
     title: "Github Finder App",
+  },
+  {
+    id: 4,
+    category: "personal",
+    img: webTwo,
+    title: "Restaurant & Dishes Listing Page",
+  },
+  {
+    id: 5,
+    category: "personal",
+    img: personalTwo,
+    title: "University Web Portal",
   },
 ];

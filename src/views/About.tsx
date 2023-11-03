@@ -1,6 +1,6 @@
 // assets
 import aboutPageImg from "../assets/about-me-page.svg";
-import profilePic from "../assets/profile-pic.png";
+import homePageIllustation from "../assets/hero-illustration.svg";
 import linkedinIcon from "../assets/linkedin-icon.svg";
 import twitterIcon from "../assets/twitter-icon.svg";
 import githubIcon from "../assets/github-icon.svg";
@@ -77,9 +77,9 @@ const About = () => {
 
         <div className="flex-1 flex items-center justify-center">
           <img
-            src={profilePic}
+            src={homePageIllustation}
             alt=""
-            className="max-w-full sm:max-w-[401px] border-2 border-secondary rounded-full"
+            className="max-w-full sm:max-w-[401px]"
           />
         </div>
       </div>

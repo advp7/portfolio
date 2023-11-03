@@ -1,6 +1,6 @@
 // assets
 import homePageImg from "../assets/home-page.svg";
-import homePageIllustation from "../assets/hero-illustration.svg";
+import profilePic from "../assets/profile-pic.png";
 import downloadIcon from "../assets/download-btn-icon.svg";
 // components
 import { Button } from "../components";
@@ -41,21 +41,17 @@ const Hero = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: false }}
-            className="w-full xl:w-fit text-center xl:text-start text-4xl sm:text-6xl lg:text-8xl
+            className="w-full xl:w-fit text-center xl:text-start text-4xl sm:text-5xl lg:text-8xl
               font-bolt text-textPrimary"
           >
-            Hi, I'm Advaith.
+            <Typewriter
+              words={["Hi, I'm Advaith."]}
+              cursor
+              cursorStyle="_"
+              typeSpeed={250}
+            />
             <br />
-            <span className="text-secondary">
-              <Typewriter
-                words={["Frontend Engineer"]}
-                cursor
-                cursorStyle="_"
-                typeSpeed={250}
-                deleteSpeed={150}
-                loop
-              />
-            </span>
+            <span className="text-secondary">Frontend Engineer</span>
           </motion.h1>
           <motion.div
             variants={fadeIn("up")}
@@ -74,15 +70,16 @@ const Hero = () => {
             </Button>
           </motion.div>
         </div>
+
         <motion.img
           variants={scale()}
           transition={transition()}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false }}
-          src={homePageIllustation}
+          src={profilePic}
           alt=""
-          className="max-w-full sm:max-w-[401px]"
+          className="max-w-full sm:max-w-[401px] border-2 border-secondary rounded-full"
         />
       </div>
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-divider" />
