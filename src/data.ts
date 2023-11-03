@@ -1,6 +1,6 @@
 import professionalOne from "./assets/professional1.png";
 import webOne from "./assets/webOne.jpg";
-import webTwo from "./assets/webTwo.png";
+import professionalTwo from "./assets/professional2.png";
 import webThree from "./assets/webThree.png";
 import personalOne from "./assets/personal1.png";
 import personalTwo from "./assets/personal2.png";
@@ -33,8 +33,8 @@ export const projects = [
   {
     id: 4,
     category: "personal",
-    img: webTwo,
-    title: "Restaurant & Dishes Listing Page",
+    img: professionalTwo,
+    title: "Product Optin Flow",
   },
   {
     id: 5,
