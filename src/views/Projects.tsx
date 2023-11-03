@@ -17,16 +17,17 @@ import { motion } from "framer-motion";
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
 
-type Category = "uiUx" | "web";
+type Category = "professional" | "personal";
 
 const Projects = () => {
-  const [activeCategory, setActiveCategory] = useState<Category>("uiUx");
+  const [activeCategory, setActiveCategory] =
+    useState<Category>("professional");
 
   const filteredProjects = () => {
-    if (activeCategory === "uiUx") {
-      return projects.filter((item) => item.category === "uiUx");
+    if (activeCategory === "professional") {
+      return projects.filter((item) => item.category === "professional");
     } else {
-      return projects.filter((item) => item.category === "web");
+      return projects.filter((item) => item.category === "personal");
     }
   };
 
@@ -61,16 +62,16 @@ const Projects = () => {
             className="flex items-center gap-4 justify-center xl:justify-start flex-col sm:flex-row"
           >
             <Button
-              secondary={activeCategory === "uiUx" ? true : false}
-              onClick={() => setActiveCategory("uiUx")}
+              secondary={activeCategory === "professional" ? true : false}
+              onClick={() => setActiveCategory("professional")}
             >
-              UI/UX
+              Professional
             </Button>
             <Button
-              secondary={activeCategory === "web" ? true : false}
-              onClick={() => setActiveCategory("web")}
+              secondary={activeCategory === "personal" ? true : false}
+              onClick={() => setActiveCategory("personal")}
             >
-              Web design
+              Personal
             </Button>
           </motion.div>
 
@@ -87,6 +88,8 @@ const Projects = () => {
             ))}
           </motion.div>
         </div>
+        <br />
+        <h6 className="text-white">*Demo on request</h6>
       </div>
     </div>
   );

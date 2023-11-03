@@ -1,45 +1,47 @@
-import uiUxOne from "./assets/ui-ux-project-one.svg";
-import uiUxTwo from "./assets/ui-ux-project-two.svg";
-import uiUxThree from "./assets/ui-ux-project-three.svg";
+import professionalOne from "./assets/professional1.png";
 import webOne from "./assets/webOne.jpg";
 import webTwo from "./assets/webTwo.png";
 import webThree from "./assets/webThree.png";
+import personalOne from "./assets/personal1.png";
+import personalTwo from "./assets/personal2.png";
+
 
 export const projects = [
   {
     id: 0,
-    category: "uiUx",
-    img: uiUxOne,
-    title: "UI/UX Web Template",
+    category: "professional",
+    img: professionalOne,
+    title: "Professional Data Entry Dashboard",
   },
   {
     id: 1,
-    category: "uiUx",
-    img: uiUxTwo,
-    title: "UI/UX Tablet Template",
+    category: "personal",
+    img: personalTwo,
+    title: "University Web Portal",
   },
+
   {
     id: 2,
-    category: "uiUx",
-    img: uiUxThree,
-    title: "Solar System App Design",
-  },
-  {
-    id: 3,
-    category: "web",
+    category: "professional",
     img: webOne,
     title: "Suite Business Landing Page",
   },
   {
-    id: 4,
-    category: "web",
+    id: 3,
+    category: "personal",
     img: webTwo,
     title: "Restaurant & Dishes Listing Page",
   },
   {
-    id: 5,
-    category: "web",
+    id: 4,
+    category: "professional",
     img: webThree,
-    title: "Feedback Flow",
+    title: "Product Feedback Flow",
+  },
+  {
+    id: 4,
+    category: "personal",
+    img: personalOne,
+    title: "Github Finder App",
   },
 ];
