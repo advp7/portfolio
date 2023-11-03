@@ -4,13 +4,10 @@ import profilePic from "../assets/profile-pic.png";
 import linkedinIcon from "../assets/linkedin-icon.svg";
 import twitterIcon from "../assets/twitter-icon.svg";
 import githubIcon from "../assets/github-icon.svg";
-
 // components
 import { SocialMediaIcon, Reveal } from "../components";
-
 // framer-motion
 import { motion } from "framer-motion";
-
 // utils
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";

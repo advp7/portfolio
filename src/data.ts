@@ -5,7 +5,6 @@ import webThree from "./assets/webThree.png";
 import personalOne from "./assets/personal1.png";
 import personalTwo from "./assets/personal2.png";
 
-
 export const projects = [
   {
     id: 0,
