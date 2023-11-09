@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/portfolio/static/css/main.4b097c83.css",
-    "main.js": "/portfolio/static/js/main.e85921ec.js",
-    "static/media/webTwo.png": "/portfolio/static/media/webTwo.184ee751e23f8ffbdbc3.png",
+    "main.js": "/portfolio/static/js/main.7cb09893.js",
     "static/media/projects-page.svg": "/portfolio/static/media/projects-page.5eba3b7bb866e982a8ecc528119ee595.svg",
     "static/media/profile-pic.png": "/portfolio/static/media/profile-pic.1ebc3154657a94c352f6.png",
     "static/media/about-me-page.svg": "/portfolio/static/media/about-me-page.b1a3a28632b01296f136791cbf93ba70.svg",
     "static/media/professional1.png": "/portfolio/static/media/professional1.cb63ce95f91239bd4eb2.png",
+    "static/media/professional2.png": "/portfolio/static/media/professional2.0112a4bbdd093f42c707.png",
     "static/media/webOne.jpg": "/portfolio/static/media/webOne.028bb1586a4edb76018b.jpg",
     "static/media/webThree.png": "/portfolio/static/media/webThree.fe87b306a65457023ff8.png",
     "static/media/home-page.svg": "/portfolio/static/media/home-page.6ec7e4c3484f0362f1f89b3f78eee5b8.svg",
@@ -21,10 +21,10 @@
     "static/media/twitter-icon.svg": "/portfolio/static/media/twitter-icon.b2065c8a44f682dfaf769d3ecad4963f.svg",
     "static/media/download-btn-icon.svg": "/portfolio/static/media/download-btn-icon.db00ff1fa6f1d172b12f9e1441c6d79c.svg",
     "main.4b097c83.css.map": "/portfolio/static/css/main.4b097c83.css.map",
-    "main.e85921ec.js.map": "/portfolio/static/js/main.e85921ec.js.map"
+    "main.7cb09893.js.map": "/portfolio/static/js/main.7cb09893.js.map"
   },
   "entrypoints": [
     "static/css/main.4b097c83.css",
-    "static/js/main.e85921ec.js"
+    "static/js/main.7cb09893.js"
   ]
 }

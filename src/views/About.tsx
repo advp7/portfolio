@@ -39,7 +39,7 @@ const About = () => {
           </Reveal>
           <Reveal>
             <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary">
-              23-year-old Frontend Engineer with ~2 years experience building
+              23-year-old Frontend Engineer with 1+ years of experience building
               user interfaces using HTML, CSS and React (Javascript/Typescript).
               This, coupled with my knowledge of Git and AWS, allows me to
               create dynamic, user-friendly web interfaces. I am passionate
