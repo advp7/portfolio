@@ -39,7 +39,7 @@ export const projects = [
   {
     id: 5,
     img: personalTwo,
-    title: "Places & Dishes Listing Page",
+    title: "Food Delivery Desktop App",
     link:"https://wonderful-starburst-8cd099.netlify.app/"
   },
 ];
