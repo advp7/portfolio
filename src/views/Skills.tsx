@@ -37,35 +37,40 @@ const Skills = () => {
       color: "#027378",
     },
     {
+      name: "Tailwind",
+      level: 65,
+      color: "#007CB5",
+    },
+    {
       name: "Material UI",
       level: 90,
-      color: "#007CB5",
+      color: "#027378",
     },
     {
       name: "Redux Toolkit",
       level: 70,
-      color: "#027378",
+      color: "#007CB5",
     },
 
     {
       name: "Git",
       level: 85,
-      color: "#007CB5",
+      color: "#027378",
     },
     {
       name: "AWS",
       level: 55,
-      color: "#027378",
+      color: "#007CB5",
     },
     {
       name: "PWA dev",
       level: 65,
-      color: "#007CB5",
+      color: "#027378",
     },
     {
       name: "Figma",
       level: 50,
-      color: "#027378",
+      color: "#007CB5",
     },
   ];
   return (
