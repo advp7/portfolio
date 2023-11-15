@@ -39,13 +39,19 @@ const About = () => {
           </Reveal>
           <Reveal>
             <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary">
-              23-year-old Frontend Engineer with 1+ years of experience building
-              user interfaces using HTML, CSS and React (Javascript/Typescript).
-              This, coupled with my knowledge of Git and AWS, allows me to
-              create dynamic, user-friendly web interfaces. I am passionate
-              about translating design concepts into responsive, engaging
-              digital experiences, and I'm dedicated to staying at the forefront
-              of the latest trends to deliver high quality results.
+              I am a 23-year-old Frontend Engineer with over 1.5 years of
+              experience working directly with company founders and CTOs. My
+              passion lies in product development, and my proficiency in React,
+              Redux, TypeScript, Material-UI, AWS and Git enables me to create
+              responsive user interfaces.
+            </p>
+            <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary mt-5">
+              I have a knack of turning design concepts into dynamic,
+              user-friendly web interfaces, a skill honed through collaboration
+              with various clients and professionals. Always open to learning
+              new technologies, I aim to further grow my skillset, making me an
+              ideal choice for a team looking to innovate and deliver high
+              quality results.
             </p>
           </Reveal>
 
