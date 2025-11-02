@@ -5,13 +5,112 @@ import contactPageImg from "../assets/contact-page.svg";
 import { Reveal } from "../components";
 
 // framer-motion
-import { motion } from "framer-motion";
-import { SkillBars } from "react-skills";
+import { motion, useInView, animate } from "framer-motion";
+import { useEffect, useRef, useState, useMemo, memo } from "react";
 
 // utils
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
 import Clients from "./Clients";
+
+interface Skill {
+  name: string;
+  level: number;
+  color: string;
+}
+
+const AnimatedNumber = memo(({ value, delay, isInView }: { value: number; delay: number; isInView: boolean }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  const animationRef = useRef<ReturnType<typeof animate> | null>(null);
+
+  useEffect(() => {
+    if (isInView) {
+      // Stop any existing animation
+      if (animationRef.current) {
+        animationRef.current.stop();
+      }
+
+      // Start new animation
+      animationRef.current = animate(0, value, {
+        duration: 1,
+        delay: delay,
+        ease: "easeOut",
+        onUpdate: (latest) => {
+          const rounded = Math.round(latest);
+          setDisplayValue((prev) => {
+            // Only update if value actually changed to prevent unnecessary re-renders
+            return rounded !== prev ? rounded : prev;
+          });
+        },
+      });
+
+      return () => {
+        if (animationRef.current) {
+          animationRef.current.stop();
+        }
+      };
+    } else {
+      setDisplayValue(0);
+      if (animationRef.current) {
+        animationRef.current.stop();
+      }
+    }
+  }, [isInView, value, delay]);
+
+  return (
+    <span className="text-sm sm:text-base font-semibold text-textSecondary">
+      {displayValue}%
+    </span>
+  );
+});
+
+AnimatedNumber.displayName = "AnimatedNumber";
+
+const SkillBar = memo(({ skill, index, isInView }: { skill: Skill; index: number; isInView: boolean }) => {
+  const delay = useMemo(() => index * 0.1, [index]);
+
+  return (
+    <div className="w-full mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-base sm:text-lg font-medium text-textPrimary">
+          {skill.name}
+        </span>
+        <AnimatedNumber value={skill.level} delay={delay} isInView={isInView} />
+      </div>
+      <div className="w-full h-3 bg-accent rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          whileInView={{ width: `${skill.level}%` }}
+          viewport={{ once: false }}
+          transition={{
+            duration: 1,
+            delay: delay,
+            ease: "easeOut",
+          }}
+          className="h-full rounded-full"
+          style={{ backgroundColor: skill.color }}
+        />
+      </div>
+    </div>
+  );
+});
+
+SkillBar.displayName = "SkillBar";
+
+const SkillsList = memo(({ skills }: { skills: Skill[] }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: false, margin: "-100px" });
+
+  return (
+    <div ref={containerRef} className="w-full">
+      {skills.map((skill, index) => (
+        <SkillBar key={skill.name} skill={skill} index={index} isInView={isInView} />
+      ))}
+    </div>
+  );
+});
+
+SkillsList.displayName = "SkillsList";
 
 const Skills = () => {
   const skillsData = [
@@ -21,19 +120,23 @@ const Skills = () => {
       color: "#007CB5",
     },
     {
-      name: "HTML/CSS",
-      level: 80,
-      color: "#027378",
-    },
-
-    {
-      name: "Javascript",
+      name: "React Native",
       level: 80,
       color: "#007CB5",
     },
     {
-      name: "Typescript",
-      level: 75,
+      name: "Android Studio/Xcode",
+      level: 65,
+      color: "#027378",
+    },
+    {
+      name: "HTML/CSS",
+      level: 85,
+      color: "#027378",
+    },
+    {
+      name: "Javascript/Typescript",
+      level: 85,
       color: "#027378",
     },
     {
@@ -42,7 +145,7 @@ const Skills = () => {
       color: "#007CB5",
     },
     {
-      name: "Material UI",
+      name: "Material UI/Base UI",
       level: 90,
       color: "#027378",
     },
@@ -51,7 +154,16 @@ const Skills = () => {
       level: 70,
       color: "#007CB5",
     },
-
+    {
+      name: "Java",
+      level: 60,
+      color: "#027378",
+    },
+    {
+      name: "SQL & MongoDB",
+      level: 60,
+      color: "#007CB5",
+    },
     {
       name: "Git",
       level: 85,
@@ -60,16 +172,6 @@ const Skills = () => {
     {
       name: "AWS",
       level: 55,
-      color: "#007CB5",
-    },
-    {
-      name: "PWA dev",
-      level: 65,
-      color: "#027378",
-    },
-    {
-      name: "Figma",
-      level: 50,
       color: "#007CB5",
     },
   ];
@@ -99,7 +201,7 @@ const Skills = () => {
           </Reveal>
           <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary pt-10">
             Some of the technologies that I have had the opportunity to work
-            with over the last 1.5+ years and an accurate percentage wise rating
+            with over the last 3 years and an accurate percentage wise rating
             of my proficiency in each of them. Continuously looking to learn and
             expand knowledge to stay at the forefront of the latest trends.
           </p>
@@ -111,9 +213,9 @@ const Skills = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false }}
-          className="flex-1 flex flex-col gap-12 w-full max-w-[696px]"
+          className="flex-1 flex flex-col gap-12 w-full max-w-[750px]"
         >
-          <SkillBars skills={skillsData} levelProgress />
+          <SkillsList skills={skillsData} />
         </motion.div>
       </div>
 

@@ -10,3 +10,23 @@
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
+/* Fix SkillBars component text truncation */
+.rs-skillbar-text,
+.rs-skillbar-text-container,
+.rs-skillbar-text-label,
+.skill-bar-name,
+[class*="skill"] [class*="text"],
+[class*="skill"] [class*="name"] {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  min-width: fit-content !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+.rs-skillbar-container {
+  width: 100% !important;
+}
