@@ -160,6 +160,11 @@ const Skills = () => {
       color: "#027378",
     },
     {
+      name: "Python",
+      level: 55,
+      color: "#007CB5",
+    },
+    {
       name: "SQL & MongoDB",
       level: 60,
       color: "#007CB5",

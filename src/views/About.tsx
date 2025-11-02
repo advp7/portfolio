@@ -39,15 +39,16 @@ const About = () => {
           </Reveal>
           <Reveal>
             <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary">
-              I am a 25-year-old Frontend Engineer with 3 years of experience
-              building React and React Native applications. I collaborate closely
-              with diverse stakeholders including company founders, CTOs, product
-              managers, and clients. My proficiency in React, Redux, TypeScript,
-              AWS, and Git, along with intermediate proficiency in Java and Python,
-              makes me a well-rounded engineer capable of working across the full stack.
+              I am a 25-year-old Software Engineer with over 3 years of experience,
+              with the majority of my expertise focused on frontend development. I
+              specialize in building React and React Native applications, and
+              collaborate closely with diverse stakeholders including company founders,
+              CTOs, product managers and clients. My proficiency in React, Redux,
+              TypeScript, AWS, and Git, along with intermediate proficiency in Java and
+              Python, makes me a well-rounded engineer capable of working across the full stack.
             </p>
             <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary mt-5">
-              I excel at turning design concepts into dynamic, user-friendly
+              I mainly excel at turning design concepts into dynamic, user-friendly
               interfaces. Having embraced AI development, I am currently working
               on AI agents and automation tools for customer experience (CX),
               leveraging cutting-edge technology to enhance user interactions and
