@@ -1,7 +1,5 @@
-// assets
-import projectsPageImg from "../assets/projects-page.svg";
 // components
-import { Card, Reveal } from "../components";
+import { ProjectCard, SectionHeading, Reveal } from "../components";
 // data
 import { projects } from "../data";
 // framer-motion
@@ -12,42 +10,40 @@ import { transition } from "../utils/transition";
 
 const Projects = () => {
   return (
-    <div
+    <section
       id="projects"
-      className="min-h-screen relative"
-      style={{
-        background: `url(${projectsPageImg})`,
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-      }}
+      className="relative border-t border-stroke scroll-mt-16"
     >
-      <div className="max-w-screen-2xl w-full py-16 px-12 mx-auto">
-        <div className="flex-1 flex flex-col gap-4">
+      <div className="max-w-screen-2xl w-full py-24 px-6 sm:px-12 mx-auto flex flex-col gap-14">
+        <div className="flex flex-col gap-6 max-w-[720px]">
+          <SectionHeading
+            eyebrow="04 — Projects"
+            title="Things I've"
+            highlight="built"
+          />
           <Reveal>
-            <h2
-              className="text-center xl:text-start text-4xl sm:text-5xl lg:text-[64px] 
-              font-bold text-textPrimary"
-            >
-              My recent <span className="text-secondary"> projects</span>
-            </h2>
+            <p className="text-center xl:text-left text-base sm:text-lg text-textSecondary leading-relaxed">
+              Production work shipped for real clients — including AI products
+              live in the wild — plus personal projects built to explore new
+              ideas.
+            </p>
           </Reveal>
-
-          <motion.div
-            variants={fadeIn("up")}
-            transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false }}
-            className="flex gap-12 mt-12 flex-wrap justify-center"
-          >
-            {projects.map((item) => (
-              <Card imgSrc={item.img} title={item.title} link={item.link} />
-            ))}
-          </motion.div>
         </div>
+
+        <motion.div
+          variants={fadeIn("up")}
+          transition={transition()}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+        >
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 

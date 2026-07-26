@@ -1,20 +1,43 @@
 // views
-import { About, Contact, Hero, Projects } from "./views";
+import {
+  About,
+  Clients,
+  Contact,
+  Experience,
+  Footer,
+  Hero,
+  Projects,
+  Skills,
+  Stats,
+} from "./views";
 
 // components
-import { Menu } from "./components";
-import Skills from "./views/Skills";
+import { BackToTop, CursorGlow, Navbar, ScrollProgress } from "./components";
 
 function App() {
   return (
-    <>
-      <Hero />
-      <About />
-      <Skills />
-      <Projects />
-      <Contact />
-      <Menu />
-    </>
+    <div className="relative overflow-x-clip">
+      {/* Ambient background: dot grid + fixed gradient glows */}
+      <div aria-hidden="true" className="fixed inset-0 -z-10 bg-night bg-glow">
+        <div className="absolute inset-0 bg-grid" />
+      </div>
+
+      <CursorGlow />
+      <ScrollProgress />
+      <Navbar />
+      <main>
+        <Hero />
+        <Stats />
+        <About />
+        <Experience />
+        <Skills />
+        <Clients />
+        <Projects />
+        <Contact />
+      </main>
+      <Footer />
+      <BackToTop />
+    </div>
   );
 }
 

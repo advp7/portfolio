@@ -6,6 +6,7 @@ interface LabelInputProps {
   placeholderText: string;
   textarea?: boolean;
   name: string;
+  type?: string;
 }
 
 const LabelInput: FC<LabelInputProps> = ({
@@ -13,34 +14,36 @@ const LabelInput: FC<LabelInputProps> = ({
   placeholderText,
   textarea,
   name,
+  type = "text",
 }) => {
+  const inputClasses = `bg-surface border border-stroke rounded-xl py-3.5 px-5 text-textPrimary text-base
+    placeholder-textMuted outline-none resize-none w-full
+    focus:border-accent/60 focus:bg-surfaceHover transition-colors duration-200`;
+
   return (
-    <div className="flex flex-col gap-2.5 flex-1 w-full">
-      <label
-        htmlFor={placeholderText}
-        className="text-textPrimary text-base sm:text-lg font-bold"
-      >
+    <div className="flex flex-col gap-2 flex-1 w-full">
+      <label htmlFor={name} className="text-textSecondary text-sm font-medium">
         {labelText}
       </label>
 
       {textarea ? (
         <textarea
           name={name}
-          id={placeholderText}
-          rows={9}
+          id={name}
+          rows={7}
+          required
           placeholder={placeholderText}
-          className="bg-accent rounded-2xl py-4 px-6 text-textPrimary text-base sm:text-lg
-         placeholder-textSecondary outline-none resize-none border-[1px] border-transparent focus:border-hoverSecondary"
-        ></textarea>
+          className={inputClasses}
+        />
       ) : (
         <input
-          type="text"
+          type={type}
           name={name}
-          id={placeholderText}
+          id={name}
+          required
           placeholder={placeholderText}
           autoComplete="off"
-          className="bg-accent rounded-2xl py-4 px-6 text-textPrimary text-base sm:text-lg
-          placeholder-textSecondary outline-none resize-none border-[1px] border-transparent focus:border-hoverSecondary"
+          className={inputClasses}
         />
       )}
     </div>

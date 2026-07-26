@@ -4,16 +4,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#222831",
-        secondary: "#007CB5",
-        textPrimary: "#EEE",
-        textSecondary: "rgba(238, 238, 238, 0.75)",
-        accent: "rgba(57, 62, 70, 0.75)",
-        hoverSecondary: "#027378",
-        hoverPrimary: "#292d33",
-        divider: "rgba(238, 238, 238, 0.10)",
-        icons: "#393E46",
-        overlay: "rgba(0, 0, 0, 0.25)",
+        night: "#060911",
+        surface: "rgba(255, 255, 255, 0.04)",
+        surfaceHover: "rgba(255, 255, 255, 0.07)",
+        stroke: "rgba(255, 255, 255, 0.09)",
+        strokeStrong: "rgba(255, 255, 255, 0.16)",
+        textPrimary: "#f1f5f9",
+        textSecondary: "#94a3b8",
+        textMuted: "#64748b",
+        accent: "#38bdf8",
+        accentAlt: "#2dd4bf",
+        accentDim: "rgba(56, 189, 248, 0.12)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       screens: {
         xs: "420px",

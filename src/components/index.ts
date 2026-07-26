@@ -1,8 +1,13 @@
-import Button from "./Button";
-import Menu from "./Menu";
-import SocialMediaIcon from "./SocialMediaIcon";
-import Card from "./Card";
-import LabelInput from "./LabelInput";
-import Reveal from "./Reveal";
-
-export { Button, Menu, SocialMediaIcon, Card, LabelInput, Reveal };
+export { default as Button } from "./Button";
+export { default as ProjectCard } from "./ProjectCard";
+export { default as Navbar } from "./Navbar";
+export { default as SectionHeading } from "./SectionHeading";
+export { default as SocialMediaIcon } from "./SocialMediaIcon";
+export { default as LabelInput } from "./LabelInput";
+export { default as Reveal } from "./Reveal";
+export { default as ScrollProgress } from "./ScrollProgress";
+export { default as BackToTop } from "./BackToTop";
+export { default as SpotlightCard } from "./SpotlightCard";
+export { default as RotatingText } from "./RotatingText";
+export { default as CursorGlow } from "./CursorGlow";
+export { default as CountUp } from "./CountUp";

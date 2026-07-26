@@ -1,6 +1,9 @@
-import Hero from "./Hero";
-import About from "./About";
-import Projects from "./Projects";
-import Contact from "./Contact";
-
-export { Hero, About, Projects, Contact };
+export { default as Hero } from "./Hero";
+export { default as Stats } from "./Stats";
+export { default as About } from "./About";
+export { default as Experience } from "./Experience";
+export { default as Skills } from "./Skills";
+export { default as Projects } from "./Projects";
+export { default as Clients } from "./Clients";
+export { default as Contact } from "./Contact";
+export { default as Footer } from "./Footer";

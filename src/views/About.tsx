@@ -1,60 +1,45 @@
 // assets
-import aboutPageImg from "../assets/about-me-page.svg";
 import homePageIllustation from "../assets/hero-illustration.svg";
-import linkedinIcon from "../assets/linkedin-icon.svg";
-import twitterIcon from "../assets/twitter-icon.svg";
-import githubIcon from "../assets/github-icon.svg";
 // components
-import { SocialMediaIcon, Reveal } from "../components";
+import { SectionHeading, Reveal, SpotlightCard } from "../components";
 // framer-motion
 import { motion } from "framer-motion";
 // utils
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
 
+const highlights = [
+  {
+    title: "Product-minded frontend",
+    body: "React & React Native apps taken from Figma handoff to production, working directly with founders, CTOs and product managers.",
+  },
+  {
+    title: "AI is my current focus",
+    body: "Building on a conversational-AI platform at Engati — AI agents and automation for customer experience that actually ship, not demos.",
+  },
+  {
+    title: "Full-stack capable",
+    body: "Shipping backend work too — Java (Spring Boot) and Python (FastAPI) services with Redis and AWS, alongside the frontend.",
+  },
+];
+
 const About = () => {
   return (
-    <div
+    <section
       id="about"
-      className="min-h-screen flex items-center justify-center relative"
-      style={{
-        background: `url(${aboutPageImg})`,
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-      }}
+      className="flex items-center justify-center relative border-t border-stroke scroll-mt-16"
     >
-      <div
-        className="max-w-screen-2xl flex flex-col xl:flex-row xl:justify-between
-      items-center xl:items-start gap-12 w-full py-16 px-12"
-      >
-        <div className="flex-1 flex flex-col gap-4">
+      <div className="max-w-screen-2xl flex flex-col xl:flex-row xl:justify-between items-center gap-12 w-full py-24 px-6 sm:px-12">
+        <div className="flex-1 flex flex-col gap-6">
+          <SectionHeading eyebrow="01 — About" title="About" highlight="me" />
+
           <Reveal>
-            <h2
-              className="text-center xl:text-start text-4xl sm:text-5xl lg:text-[64px] 
-              font-bold text-textPrimary"
-            >
-              About <span className="text-secondary"> me</span>
-            </h2>
-          </Reveal>
-          <Reveal>
-            <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary">
-              I am a 25-year-old Software Engineer with over 3 years of experience,
-              with the majority of my expertise focused on frontend development. I
-              specialize in building React and React Native applications, and
-              collaborate closely with diverse stakeholders including company founders,
-              CTOs, product managers and clients. My proficiency in React, Redux,
-              TypeScript, AWS, and Git, along with intermediate proficiency in Java and
-              Python, makes me a well-rounded engineer capable of working across the full stack.
-            </p>
-            <p className="text-center xl:text-start text-base sm:text-lg text-textSecondary mt-5">
-              I mainly excel at turning design concepts into dynamic, user-friendly
-              interfaces. Having embraced AI development, I am currently working
-              on AI agents and automation tools for customer experience (CX),
-              leveraging cutting-edge technology to enhance user interactions and
-              customer engagement. Always open to learning new technologies, I
-              continue to grow my skillset, making me an ideal choice for teams
-              looking to innovate and deliver high quality results.
+            <p className="text-center xl:text-left text-base sm:text-lg text-textSecondary leading-relaxed">
+              I'm a software engineer with 4+ years of experience, most of it
+              spent building frontend products people actually use. Currently
+              a Senior UI Developer at Engati, I specialize in turning design
+              concepts into dynamic, user-friendly interfaces — and shipping
+              them fast without cutting corners.
             </p>
           </Reveal>
 
@@ -63,38 +48,43 @@ const About = () => {
             transition={transition()}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: false }}
-            className="flex items-center justify-center xl:justify-start gap-6"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"
           >
-            <SocialMediaIcon
-              imgSrc={linkedinIcon}
-              title="LinkedIn"
-              link="https://www.linkedin.com/in/advaith-praveen"
-            />
-            <SocialMediaIcon
-              imgSrc={githubIcon}
-              title="Github"
-              link="https://github.com/advp7"
-            />
-            <SocialMediaIcon
-              imgSrc={twitterIcon}
-              title="Twitter"
-              link="https://twitter.com/advp007"
-            />
+            {highlights.map((item) => (
+              <SpotlightCard
+                key={item.title}
+                className="flex flex-col gap-2 bg-surface border border-stroke rounded-2xl p-6
+                hover:border-strokeStrong hover:bg-surfaceHover transition-colors duration-300"
+              >
+                <h3 className="font-display font-semibold text-textPrimary">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-textSecondary leading-relaxed">
+                  {item.body}
+                </p>
+              </SpotlightCard>
+            ))}
           </motion.div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
+        <motion.div
+          variants={fadeIn("up")}
+          transition={transition()}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="hidden xl:flex flex-1 items-center justify-center max-w-[420px]"
+        >
           <img
             src={homePageIllustation}
             alt=""
-            className="max-w-full sm:max-w-[401px]"
+            aria-hidden="true"
+            className="max-w-full"
           />
-        </div>
+        </motion.div>
       </div>
-
-      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-divider" />
-    </div>
+    </section>
   );
 };
 
