@@ -12,7 +12,13 @@ import {
 } from "./views";
 
 // components
-import { BackToTop, CursorGlow, Navbar, ScrollProgress } from "./components";
+import {
+  BackToTop,
+  CommandPalette,
+  CustomCursor,
+  Navbar,
+  ScrollProgress,
+} from "./components";
 
 function App() {
   return (
@@ -22,7 +28,6 @@ function App() {
         <div className="absolute inset-0 bg-grid" />
       </div>
 
-      <CursorGlow />
       <ScrollProgress />
       <Navbar />
       <main>
@@ -37,6 +42,8 @@ function App() {
       </main>
       <Footer />
       <BackToTop />
+      <CommandPalette />
+      <CustomCursor />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 export { default as Button } from "./Button";
-export { default as ProjectCard } from "./ProjectCard";
 export { default as Navbar } from "./Navbar";
 export { default as SectionHeading } from "./SectionHeading";
 export { default as SocialMediaIcon } from "./SocialMediaIcon";
@@ -9,5 +8,9 @@ export { default as ScrollProgress } from "./ScrollProgress";
 export { default as BackToTop } from "./BackToTop";
 export { default as SpotlightCard } from "./SpotlightCard";
 export { default as RotatingText } from "./RotatingText";
-export { default as CursorGlow } from "./CursorGlow";
 export { default as CountUp } from "./CountUp";
+export { default as ArchitectureDiagram } from "./ArchitectureDiagram";
+export { default as CaseStudyModal } from "./CaseStudyModal";
+export { default as NodeNetwork } from "./NodeNetwork";
+export { default as CommandPalette } from "./CommandPalette";
+export { default as CustomCursor } from "./CustomCursor";

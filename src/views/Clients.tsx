@@ -21,12 +21,13 @@ import {
   useVelocity,
 } from "framer-motion";
 
-const clients = [
+// invertOnDark: logo artwork is black, so it vanishes on the dark theme
+const clients: { name: string; img: string; invertOnDark?: boolean }[] = [
   { name: "Swiggy", img: swiggyImg },
   { name: "Zomato", img: zomatoImg },
   { name: "Edelweiss", img: edelweissImg },
-  { name: "Cypherock", img: cypherockImg },
-  { name: "Mamaketo", img: mamaketoImg },
+  { name: "Cypherock", img: cypherockImg, invertOnDark: true },
+  { name: "Mamaketo", img: mamaketoImg, invertOnDark: true },
   { name: "O4H — Order for Health", img: o4hImg },
 ];
 
@@ -96,8 +97,9 @@ const Clients = () => {
               key={`${client.name}-${index}`}
               src={client.img}
               alt={client.name}
-              className="h-12 sm:h-14 w-auto max-w-[140px] object-contain opacity-60
-              hover:opacity-100 transition-opacity duration-300"
+              className={`h-12 sm:h-14 w-auto max-w-[140px] object-contain opacity-60 ${
+                client.invertOnDark ? "invert-on-dark" : ""
+              } hover:opacity-100 transition-opacity duration-300`}
             />
           ))}
         </motion.div>

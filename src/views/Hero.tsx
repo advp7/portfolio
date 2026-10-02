@@ -5,7 +5,14 @@ import linkedinIcon from "../assets/linkedin-icon.svg";
 import githubIcon from "../assets/github-icon.svg";
 import twitterIcon from "../assets/twitter-icon.svg";
 // components
-import { Button, RotatingText, SocialMediaIcon } from "../components";
+import {
+  Button,
+  NodeNetwork,
+  RotatingText,
+  SocialMediaIcon,
+} from "../components";
+// intro
+import { useIntro } from "../intro";
 // data
 import { socials } from "../data";
 // framer-motion
@@ -35,17 +42,35 @@ const Hero = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const cueOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
 
+  // The intro greeting lands exactly on the headline's first line, so with
+  // the intro the <h1> skips its own entrance and sits at its final position.
+  // With the intro, hero pieces animate in when the greeting starts flying
+  // (so they appear around it); otherwise they animate on first view as usual
+  const intro = useIntro();
+  const entrance = intro.active
+    ? {
+        initial: "hidden",
+        animate: intro.revealed ? "visible" : "hidden",
+      }
+    : {
+        initial: "hidden",
+        whileInView: "visible",
+        viewport: { once: true },
+      };
+
   return (
     <section
       ref={sectionRef}
       id="home"
       className="min-h-screen flex items-center justify-center relative pt-16"
     >
+      <NodeNetwork />
+
       <motion.div
         style={
           shouldReduceMotion ? undefined : { opacity: heroOpacity }
         }
-        className="max-w-screen-2xl flex flex-col-reverse xl:flex-row xl:justify-between items-center gap-12 w-full py-16 px-6 sm:px-12"
+        className="relative z-[1] max-w-screen-2xl flex flex-col-reverse xl:flex-row xl:justify-between items-center gap-12 w-full pt-16 pb-16 sm:pb-28 px-6 sm:px-12"
       >
         <motion.div
           style={shouldReduceMotion ? undefined : { y: contentY }}
@@ -54,9 +79,7 @@ const Hero = () => {
           <motion.div
             variants={fadeIn("down")}
             transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...entrance}
             className="flex items-center gap-2.5 py-1.5 px-4 rounded-full bg-surface border border-stroke mb-8"
           >
             <span className="relative flex h-2.5 w-2.5">
@@ -71,46 +94,59 @@ const Hero = () => {
           <motion.h1
             variants={fadeIn("down")}
             transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...(intro.active
+              ? { initial: false }
+              : {
+                  initial: "hidden",
+                  whileInView: "visible",
+                  viewport: { once: true },
+                })}
             className="text-center xl:text-left font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-textPrimary leading-[1.05]"
           >
-            Hi, I'm <span className="gradient-text">Advaith.</span>
+            <span
+              ref={intro.greetingRef}
+              style={{ visibility: intro.done ? undefined : "hidden" }}
+            >
+              Hi, I'm <span className="gradient-text">Advaith.</span>
+            </span>
             <br />
-            <RotatingText
-              phrases={[
-                "Frontend Engineer.",
-                "AI Agent Builder.",
-                "React Specialist.",
-              ]}
-              className="text-textPrimary"
-            />
+            <motion.span
+              className="inline-block"
+              variants={fadeIn("up")}
+              transition={transition(0.15)}
+              {...(intro.active ? entrance : {})}
+            >
+              <RotatingText
+                phrases={[
+                  "Frontend Engineer.",
+                  "Full-Stack Builder.",
+                  "AI Agent Developer.",
+                ]}
+                className="text-textPrimary"
+              />
+            </motion.span>
           </motion.h1>
 
           <motion.p
             variants={fadeIn("up")}
             transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...entrance}
             className="mt-6 text-center xl:text-left text-base sm:text-lg text-textSecondary max-w-[560px] leading-relaxed"
           >
-            I build fast, polished web and mobile products with React and React
-            Native — and I'm currently building{" "}
             <span className="text-textPrimary font-medium">
-              AI agents for customer experience
-            </span>
-            . My work runs in production at Edelweiss, and has been used by
-            teams at Swiggy and Zomato.
+              Frontend at the core, full-stack in practice.
+            </span>{" "}
+            I build polished web and mobile products with React and React
+            Native — and ship the Java and Python services behind them.
+            Currently building AI agents for customer experience; my work runs
+            in production at Edelweiss and has been used by teams at Swiggy and
+            Zomato.
           </motion.p>
 
           <motion.div
             variants={fadeIn("up")}
             transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...entrance}
             className="mt-10 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
             <Button secondary href="#projects">
@@ -127,9 +163,7 @@ const Hero = () => {
           <motion.div
             variants={fadeIn("up")}
             transition={transition(0.2)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...entrance}
             className="mt-8 flex items-center gap-4"
           >
             <SocialMediaIcon
@@ -157,21 +191,32 @@ const Hero = () => {
           <motion.div
             variants={scale()}
             transition={transition()}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            {...entrance}
             className="relative"
           >
             <div
               aria-hidden="true"
               className="absolute -inset-6 rounded-full bg-gradient-to-tr from-accent/30 to-accentAlt/30 blur-2xl"
             />
-            <img
-              src={profilePic}
-              alt="Portrait of Advaith Praveen"
-              className="relative max-w-[260px] sm:max-w-[340px] xl:max-w-[400px] rounded-full
-              border-2 border-strokeStrong shadow-[0_0_60px_rgba(56,189,248,0.15)]"
-            />
+            {/* Rotating gradient ring: a spinning conic gradient, clipped to a
+                3px band by the padded, rounded wrapper */}
+            <div className="relative rounded-full p-[3px] overflow-hidden shadow-[0_0_60px_rgba(56,189,248,0.15)]">
+              <div
+                aria-hidden="true"
+                className="ring-spin absolute inset-[-40%]"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent-alt)) 25%, transparent 40%, transparent 60%, rgb(var(--accent)) 80%, rgb(var(--accent-alt)))",
+                }}
+              />
+              <div className="relative rounded-full overflow-hidden bg-night">
+                <img
+                  src={profilePic}
+                  alt="Portrait of Advaith Praveen"
+                  className="block max-w-[254px] sm:max-w-[334px] xl:max-w-[394px] rounded-full"
+                />
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       </motion.div>

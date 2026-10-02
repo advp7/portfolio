@@ -1,5 +1,5 @@
 // react
-import { FC, ReactNode } from "react";
+import { CSSProperties, FC, ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode;
@@ -20,7 +20,7 @@ const Button: FC<ButtonProps> = ({
 }) => {
   const className = secondary
     ? `inline-flex items-center justify-center gap-2.5 py-3 px-8 rounded-full font-medium text-base
-       bg-gradient-to-r from-accent to-accentAlt text-[#04121b]
+       bg-gradient-to-r from-accent to-accentAlt text-onAccent
        hover:shadow-[0_0_32px_rgba(56,189,248,0.35)] hover:-translate-y-0.5
        transition-all duration-300 w-full sm:w-fit`
     : `inline-flex items-center justify-center gap-2.5 py-3 px-8 rounded-full font-medium text-base
@@ -31,7 +31,13 @@ const Button: FC<ButtonProps> = ({
   const content = (
     <>
       <span>{children}</span>
-      {icon && <img src={icon} alt="" className="h-4 w-4" />}
+      {icon && (
+        <span
+          aria-hidden="true"
+          className="icon-mask h-4 w-4"
+          style={{ "--icon": `url(${icon})` } as CSSProperties}
+        />
+      )}
     </>
   );
 

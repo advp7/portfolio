@@ -2,6 +2,7 @@
 import { FC, ReactNode, useRef } from "react";
 // framer-motion
 import {
+  MotionStyle,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -13,6 +14,9 @@ interface SpotlightCardProps {
   className?: string;
   /** Enable subtle 3D tilt toward the cursor */
   tilt?: boolean;
+  /** Shared-element id: lets the card morph into another element (e.g. a modal) */
+  layoutId?: string;
+  style?: MotionStyle;
 }
 
 /**
@@ -23,6 +27,8 @@ const SpotlightCard: FC<SpotlightCardProps> = ({
   children,
   className = "",
   tilt = false,
+  layoutId,
+  style,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -56,11 +62,15 @@ const SpotlightCard: FC<SpotlightCardProps> = ({
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={
-        tilt && !shouldReduceMotion
+      layoutId={layoutId}
+      style={{
+        ...(tilt && !shouldReduceMotion
           ? { rotateX, rotateY, transformPerspective: 900 }
-          : undefined
-      }
+          : {}),
+        // framer animates radius only when it's set inline
+        ...(layoutId ? { borderRadius: 16 } : {}),
+        ...style,
+      }}
       className={`spotlight-card relative ${className}`}
     >
       {children}

@@ -10,7 +10,7 @@ import { transition } from "../utils/transition";
 
 const highlights = [
   {
-    title: "Product-minded frontend",
+    title: "Frontend is my core",
     body: "React & React Native apps taken from Figma handoff to production, working directly with founders, CTOs and product managers.",
   },
   {
@@ -18,8 +18,8 @@ const highlights = [
     body: "Building on a conversational-AI platform at Engati — AI agents and automation for customer experience that actually ship, not demos.",
   },
   {
-    title: "Full-stack capable",
-    body: "Shipping backend work too — Java (Spring Boot) and Python (FastAPI) services with Redis and AWS, alongside the frontend.",
+    title: "Full-stack in practice",
+    body: "Not just UI — I ship Java (Spring Boot) and Python (FastAPI) services with Redis and AWS, and shape the API contracts I consume.",
   },
 ];
 
@@ -35,11 +35,12 @@ const About = () => {
 
           <Reveal>
             <p className="text-center xl:text-left text-base sm:text-lg text-textSecondary leading-relaxed">
-              I'm a software engineer with 4+ years of experience, most of it
-              spent building frontend products people actually use. Currently
-              a Senior UI Developer at Engati, I specialize in turning design
-              concepts into dynamic, user-friendly interfaces — and shipping
-              them fast without cutting corners.
+              I'm a software engineer with 4+ years of experience — frontend
+              at the core, and increasingly full-stack. I specialize in turning
+              design concepts into dynamic, user-friendly interfaces, and I've
+              picked up the backend along the way: Java, Python and Redis, so I
+              can own a feature end to end rather than hand it off at the API
+              boundary.
             </p>
           </Reveal>
 

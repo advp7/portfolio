@@ -1,91 +1,108 @@
-import professionalOne from "./assets/professional1.png";
-import webOne from "./assets/webOne.jpg";
-import professionalTwo from "./assets/professional2.png";
-import webThree from "./assets/webThree.png";
-import personalOne from "./assets/personal1.png";
-import personalTwo from "./assets/personal2.png";
-import ellieCover from "./assets/ellie-cover.svg";
+export type DiagramId = "ai-assistant" | "rcs";
 
-export interface Project {
-  id: number;
-  img: string;
+export interface CaseStudy {
+  id: string;
+  eyebrow: string;
   title: string;
-  description: string;
+  summary: string;
+  metric: { value: string; label: string };
   stack: string[];
-  link: string;
-  tag: "Professional" | "Personal";
+  /** Shown instead of a link — this work lives on client sites / inside products. */
+  access: string;
+  diagram: DiagramId;
+  /** Earlier, separate work for the same client — framing, not this project */
+  background?: { label: string; text: string };
+  context: string;
+  role: string[];
+  build: string;
+  outcome: string[];
 }
 
-export const projects: Project[] = [
+// Client names are deliberately described rather than named.
+export const caseStudies: CaseStudy[] = [
   {
-    id: 6,
-    img: ellieCover,
-    title: "Ellie — AI Assistant for Edelweiss",
-    description:
-      "Custom AI assistant live on Edelweiss Mutual Fund's website, handling hundreds of customer queries a week. Owned the entire frontend end to end; Python FastAPI backend with Gemini model calls, tool calling and Redis caching.",
-    stack: ["React", "FastAPI", "Gemini", "Redis"],
-    link: "https://www.edelweissmf.com",
-    tag: "Professional",
+    id: "ai-assistant",
+    eyebrow: "AI · In production",
+    title: "Ellie, an AI assistant for Edelweiss Mutual Fund",
+    summary:
+      "A custom AI assistant on Edelweiss Mutual Fund's public website, answering customer questions every day. I owned the frontend end to end and worked across the backend that powers it.",
+    metric: { value: "100s", label: "customer queries handled every week" },
+    stack: ["React", "Python · FastAPI", "Gemini", "Tool calling", "Redis"],
+    access: "Live on client site",
+    diagram: "ai-assistant",
+    background: {
+      label: "Earlier project with Edelweiss",
+      text: "Before the AI assistant, Edelweiss had already brought us challenging requirements: highly specific, non-standard UI needs that posed significant challenges for our implementation and CSM teams. I unblocked that go-live by engineering customizations in custom JavaScript and CSS that hadn't been attempted before.",
+    },
+    context:
+      "The AI assistant was a whole new kind of requirement: a custom AI assistant on their public website, so customers could get answers to their questions directly on the site. A different problem, from a client with the same high bar.",
+    role: [
+      "Owned the entire frontend end to end: requirements gathering with Edelweiss, design, implementation and review.",
+      "Worked on the Python FastAPI backend, integrating Gemini model calls, tool calling and Redis caching.",
+    ],
+    build:
+      "The React chat interface talks to a FastAPI service that orchestrates Gemini. The model can call tools to fetch what it needs to answer, and Redis caches responses so repeat questions come back fast.",
+    outcome: [
+      "Live on Edelweiss Mutual Fund's public website, handling hundreds of customer queries a week.",
+    ],
   },
   {
-    id: 0,
-    img: professionalOne,
-    title: "Platform Operations Dashboard",
+    id: "rcs",
+    eyebrow: "Launch · Google partnership",
+    title: "Landing Engati's RCS channel",
+    summary:
+      "Pulled in at short notice to land a Google-facing channel launch, then turned the rush job into reusable architecture the product still builds on.",
+    metric: { value: "~10 days", label: "from being pulled in to launch" },
+    stack: ["React", "TypeScript", "State management", "REST APIs"],
+    access: "Inside the Engati product",
+    diagram: "rcs",
+    context:
+      "RCS (Rich Communication Services) opened up new use cases and a new revenue stream for Engati. The launch was time-bound and high-visibility, with external dependencies and expectations from Google. It had to go live quickly and establish credibility with Google.",
+    role: [
+      "Pulled in at short notice ahead of the launch, and shipped a working frontend in about ten days.",
+      "Went on to own the frontend architecture and state management for the channel.",
+      "Worked closely with backend engineers to align API contracts and reduce integration friction.",
+    ],
+    build:
+      "Rather than building each flow separately, RCS rendering and state live in one shared layer. Broadcast campaigns and the template-message node consume it, and template creation was designed to plug into it, so new RCS capabilities land once and show up everywhere.",
+    outcome: [
+      "Delivered the launch in about ten days.",
+      "The shared architecture carried new RCS features and improvements after launch.",
+    ],
+  },
+];
+
+export interface EarlierWork {
+  id: string;
+  title: string;
+  org: string;
+  description: string;
+  stack: string[];
+  tag: "Professional" | "Personal";
+  link?: string;
+  access?: string;
+}
+
+export const earlierWork: EarlierWork[] = [
+  {
+    id: "infinitybox-dashboard",
+    title: "Partner operations dashboard",
+    org: "InfinityBox",
     description:
-      "Authenticated data-entry and operations dashboard used internally at InfinityBox — filterable tables, multi-step entry workflows and role-aware views.",
+      "Owned the frontend of InfinityBox's operations and data-entry dashboard, used by teams at Swiggy and Zomato during partner collaborations. Built directly with the CTO and founders.",
     stack: ["React", "TypeScript", "Redux Toolkit", "Material UI"],
-    link: "https://stage-platform-dashboard.getinfinitybox.com/login/demo",
     tag: "Professional",
+    access: "Internal product",
   },
   {
-    id: 1,
-    img: professionalTwo,
-    title: "Product Opt-in Flow",
+    id: "infinitybox-customer-flows",
+    title: "Customer opt-in & feedback flows",
+    org: "InfinityBox",
     description:
-      "Mobile-first customer opt-in journey built for the Swiggy integration — QR-linked, fast-loading and built to handle real production traffic.",
+      "Mobile-first opt-in and feedback journeys for end customers, built for the Swiggy integration and designed for fast loads and high completion on phones.",
     stack: ["React", "TypeScript", "REST APIs"],
-    link: "https://stage-optin.getinfinitybox.com/swiggy/59152/168447263110",
     tag: "Professional",
-  },
-  {
-    id: 2,
-    img: webThree,
-    title: "Product Feedback Flow",
-    description:
-      "End-customer feedback capture flow with a lightweight, distraction-free UI designed for high completion rates on mobile.",
-    stack: ["React", "TypeScript", "REST APIs"],
-    link: "https://stage-feedback.getinfinitybox.com/03917d7b-edf4-11ed-8e04-02d36438789c",
-    tag: "Professional",
-  },
-  {
-    id: 3,
-    img: webOne,
-    title: "Suite Business Landing Page",
-    description:
-      "Responsive marketing landing page for a business suite — pixel-perfect build from design handoff with smooth scroll animations.",
-    stack: ["React", "CSS", "Responsive Design"],
-    link: "https://capable-lamington-ba40c3.netlify.app/",
-    tag: "Personal",
-  },
-  {
-    id: 4,
-    img: personalOne,
-    title: "GitHub Finder",
-    description:
-      "Search GitHub users and drill into profiles and repositories via the GitHub REST API, with debounced search and graceful loading states.",
-    stack: ["React", "Context API", "GitHub API"],
-    link: "https://roaring-churros-4f2be0.netlify.app/",
-    tag: "Personal",
-  },
-  {
-    id: 5,
-    img: personalTwo,
-    title: "Food Delivery App",
-    description:
-      "Food-ordering interface with cart management, menu browsing and a clean checkout flow, built as a desktop-class web app.",
-    stack: ["React", "JavaScript", "CSS"],
-    link: "https://wonderful-starburst-8cd099.netlify.app/",
-    tag: "Personal",
+    access: "Client-facing product",
   },
 ];
 
@@ -233,7 +250,7 @@ export const stats: Stat[] = [
   {
     value: 10,
     prefix: "~",
-    label: "Days from pulled in to RCS launch",
+    label: "Days to ship a Google-partnered launch",
   },
 ];
 

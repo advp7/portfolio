@@ -1,5 +1,8 @@
 // react
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+// components
+import ThemeToggle from "./ThemeToggle";
+import { OPEN_PALETTE_EVENT, isMac } from "./CommandPalette";
 // data
 import { navLinks } from "../data";
 
@@ -7,6 +10,8 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const modKey = useMemo(() => (isMac() ? "⌘" : "Ctrl"), []);
+  const openPalette = () => window.dispatchEvent(new Event(OPEN_PALETTE_EVENT));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -53,8 +58,9 @@ const Navbar = () => {
           advaith<span className="gradient-text">.dev</span>
         </a>
 
+        <div className="flex items-center gap-4 lg:gap-8">
         {/* Desktop links */}
-        <ul className="hidden md:flex items-center gap-8">
+        <ul className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
             <li key={link.href} className="relative">
               <a
@@ -81,19 +87,35 @@ const Navbar = () => {
               href={`${process.env.PUBLIC_URL}/CV_ADVAITH.pdf`}
               download="Advaith_Resume.pdf"
               className="text-sm font-medium py-2 px-5 rounded-full bg-gradient-to-r from-accent to-accentAlt
-              text-[#04121b] hover:shadow-[0_0_24px_rgba(56,189,248,0.35)] transition-shadow duration-300"
+              text-onAccent hover:shadow-[0_0_24px_rgba(56,189,248,0.35)] transition-shadow duration-300"
             >
               Resume
             </a>
           </li>
         </ul>
 
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={openPalette}
+            aria-label="Open command menu"
+            aria-keyshortcuts="Meta+K Control+K"
+            title="Command menu"
+            className="hidden lg:flex items-center gap-1 h-10 rounded-full border border-stroke bg-surface px-3
+            text-textMuted hover:text-textPrimary hover:border-strokeStrong transition-colors duration-200"
+          >
+            <kbd className="font-mono text-[11px]">{modKey}</kbd>
+            <kbd className="font-mono text-[11px]">K</kbd>
+          </button>
+          <ThemeToggle />
+        </div>
+
         {/* Mobile hamburger */}
         <button
           type="button"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
-          className="md:hidden flex flex-col justify-center items-center gap-1.5 h-10 w-10"
+          className="lg:hidden flex flex-col justify-center items-center gap-1.5 h-10 w-10"
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span
@@ -112,11 +134,12 @@ const Navbar = () => {
             }`}
           />
         </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <ul className="md:hidden glass border-b border-stroke px-6 pb-6 flex flex-col gap-4">
+        <ul className="lg:hidden glass border-b border-stroke px-6 pb-6 flex flex-col gap-4">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
@@ -129,10 +152,22 @@ const Navbar = () => {
             </li>
           ))}
           <li>
+            <button
+              type="button"
+              className="block py-1 text-textSecondary hover:text-textPrimary transition-colors"
+              onClick={() => {
+                setMenuOpen(false);
+                openPalette();
+              }}
+            >
+              Command menu
+            </button>
+          </li>
+          <li>
             <a
               href={`${process.env.PUBLIC_URL}/CV_ADVAITH.pdf`}
               download="Advaith_Resume.pdf"
-              className="inline-block text-sm font-medium py-2 px-5 rounded-full bg-gradient-to-r from-accent to-accentAlt text-[#04121b]"
+              className="inline-block text-sm font-medium py-2 px-5 rounded-full bg-gradient-to-r from-accent to-accentAlt text-onAccent"
               onClick={() => setMenuOpen(false)}
             >
               Resume
