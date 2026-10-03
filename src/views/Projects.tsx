@@ -22,6 +22,7 @@ import {
 } from "framer-motion";
 import { OPEN_CASE_STUDY_EVENT } from "../components/CommandPalette";
 // assistant
+import Orb from "../assistant/Orb";
 import {
   HIGHLIGHT_ASSISTANT_EVENT,
   OPEN_ASSISTANT_EVENT,
@@ -309,13 +310,7 @@ const AskAdvaithCard = () => (
       {/* The invitation: looks like the chat it opens */}
       <div className="flex flex-col gap-4 rounded-xl border border-stroke bg-night/60 p-5">
         <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="flex h-7 w-7 items-center justify-center rounded-full
-            bg-gradient-to-br from-accent to-accentAlt text-onAccent text-xs"
-          >
-            ✦
-          </span>
+          <Orb size={28} />
           <span className="text-sm font-semibold text-textPrimary">Ask Advaith</span>
         </div>
         <p className="max-w-[90%] rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 text-sm text-textSecondary">
