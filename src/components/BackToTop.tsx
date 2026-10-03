@@ -24,7 +24,7 @@ const BackToTop = () => {
           exit={{ opacity: 0, y: 16 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-[5.25rem] right-6 z-40 flex items-center justify-center h-11 w-11
+          className="fixed bottom-[4.75rem] right-5 sm:bottom-[5.25rem] sm:right-6 z-40 flex items-center justify-center h-11 w-11
           rounded-full glass border border-stroke text-textSecondary
           hover:text-textPrimary hover:border-accent/60 hover:-translate-y-0.5
           transition-colors duration-200"

@@ -24,12 +24,12 @@ const Footer = () => {
   const time = useBengaluruTime();
   return (
     <footer className="border-t border-stroke">
-      <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 py-10 px-6 sm:px-12">
+      <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 pt-10 pb-28 sm:pb-10 px-6 sm:px-12">
         <div className="flex flex-col items-center sm:items-start gap-2">
           <a href="#home" className="font-display font-bold text-textPrimary">
             advaith<span className="gradient-text">.dev</span>
           </a>
-          <p className="flex items-center gap-2 font-mono text-[11px] text-textMuted">
+          <p className="flex items-center justify-center sm:justify-start gap-2 text-center sm:text-left font-mono text-[11px] text-textMuted">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-accentAlt opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accentAlt" />
@@ -51,7 +51,7 @@ const Footer = () => {
           ))}
         </ul>
 
-        <p className="text-sm text-textMuted">
+        <p className="text-center text-sm text-textMuted">
           © {new Date().getFullYear()} Advaith Praveen ·{" "}
           <a
             href={socials.github}

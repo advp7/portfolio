@@ -690,16 +690,18 @@ const AskAdvaith = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             aria-haspopup="dialog"
             aria-keyshortcuts={isMac() ? "Meta+J" : "Control+J"}
-            className={`ai-launcher fixed bottom-6 right-6 z-[60] flex h-12 items-center gap-2.5 rounded-full
-            glass pl-2 pr-4 text-sm font-medium text-textPrimary
+            className={`ai-launcher fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60] flex h-12 items-center gap-2.5 rounded-full
+            glass px-[9px] sm:pl-2 sm:pr-4 text-sm font-medium text-textPrimary
             shadow-[0_12px_40px_var(--shadow-modal)] hover:-translate-y-0.5 transition-transform
             ${highlighted ? "is-highlighted" : ""}`}
           >
             <Orb size={30} />
-            Ask Advaith
+            {/* Phones get just the orb, so it never sits on top of content */}
+            <span className="hidden sm:inline">Ask Advaith</span>
             <kbd className="hidden lg:inline rounded border border-stroke px-1.5 py-0.5 font-mono text-[10px] text-textMuted">
               {shortcut}
             </kbd>
+            <span className="sr-only sm:hidden">Ask Advaith</span>
             <span className="sr-only"> (AI assistant)</span>
           </motion.button>
         )}
@@ -972,7 +974,7 @@ const AskAdvaith = () => {
                     onKeyDown={onInputKeyDown}
                     maxLength={MAX_CHARS}
                     disabled={atLimit}
-                    placeholder={atLimit ? "Start a new chat to continue" : "Ask about Advaith's work…"}
+                    placeholder={atLimit ? "Start a new chat to continue" : "Ask me anything…"}
                     aria-label="Your question"
                     className="min-h-[40px] min-w-0 flex-1 resize-none bg-transparent py-2.5 text-sm text-textPrimary
                     placeholder-textMuted outline-none"

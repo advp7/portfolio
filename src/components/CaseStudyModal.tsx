@@ -262,7 +262,8 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
                     px-4 py-2 text-sm font-medium text-textPrimary whitespace-nowrap
                     hover:border-accent/60 hover:text-accent transition-colors"
                   >
-                    {study.live.label}
+                    <span className="sm:hidden">{study.live.shortLabel}</span>
+                    <span className="hidden sm:inline">{study.live.label}</span>
                     <span aria-hidden="true">↗</span>
                   </a>
                 ) : (

@@ -119,14 +119,14 @@ const FeaturedProject: FC<{
 
         <StackChips stack={study.stack} />
 
-        <div className="flex flex-wrap items-center gap-4 pt-1">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4 pt-1">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation(); // the card's own click would open it twice
               onOpen(study);
             }}
-            className="group/btn inline-flex items-center gap-2 py-2.5 px-6 rounded-full font-medium text-sm
+            className="group/btn inline-flex items-center justify-center gap-2 py-2.5 px-6 rounded-full font-medium text-sm
             bg-gradient-to-r from-accent to-accentAlt text-onAccent
             hover:shadow-[0_0_28px_rgba(56,189,248,0.35)] hover:-translate-y-0.5 transition-all duration-300"
           >
@@ -144,11 +144,12 @@ const FeaturedProject: FC<{
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="group/live inline-flex items-center gap-2 py-2.5 px-5 rounded-full text-sm font-medium
+              className="group/live inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-full text-sm font-medium
               text-textPrimary border border-strokeStrong hover:border-accent/60 hover:text-accent
               hover:-translate-y-0.5 transition-all duration-300"
             >
-              {study.live.label}
+              <span className="sm:hidden">{study.live.shortLabel}</span>
+              <span className="hidden sm:inline">{study.live.label}</span>
               <ExternalIcon />
             </a>
           ) : (
@@ -285,16 +286,18 @@ const AskAdvaithCard = () => (
         </p>
         <ol
           aria-label="How a question travels"
-          className="flex flex-wrap items-center gap-x-1.5 gap-y-2 font-mono text-[11px]"
+          className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1.5 sm:gap-y-2
+          font-mono text-[11px]"
         >
           {PIPELINE.map((step, i) => (
-            <li key={step} className="flex items-center gap-1.5">
+            <li key={step} className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-1.5">
               <span className="rounded-md border border-stroke px-2 py-1 text-textSecondary">
                 {step}
               </span>
               {i < PIPELINE.length - 1 && (
-                <span aria-hidden="true" className="text-accent">
-                  →
+                <span aria-hidden="true" className="pl-3 text-accent sm:pl-0">
+                  <span className="sm:hidden">↓</span>
+                  <span className="hidden sm:inline">→</span>
                 </span>
               )}
             </li>

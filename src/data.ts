@@ -10,7 +10,7 @@ export interface CaseStudy {
   /** Where the work lives, e.g. "Live on client site" */
   access: string;
   /** Public page where visitors can see or try it */
-  live?: { href: string; label: string };
+  live?: { href: string; label: string; shortLabel: string };
   diagram: DiagramId;
   /** Earlier, separate work for the same client — framing, not this project */
   background?: { label: string; text: string };
@@ -34,6 +34,7 @@ export const caseStudies: CaseStudy[] = [
     live: {
       href: "https://www.edelweissmf.com",
       label: "Try Ellie on edelweissmf.com",
+      shortLabel: "Try Ellie live",
     },
     diagram: "ai-assistant",
     background: {
@@ -64,6 +65,7 @@ export const caseStudies: CaseStudy[] = [
     live: {
       href: "https://www.engati.ai/rcs-business",
       label: "Explore RCS on engati.ai",
+      shortLabel: "Explore RCS live",
     },
     diagram: "rcs",
     context:

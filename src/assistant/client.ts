@@ -37,6 +37,7 @@ interface TurnstileApi {
     options: {
       sitekey: string;
       appearance?: "always" | "execute" | "interaction-only";
+      size?: "normal" | "compact" | "flexible";
       theme?: "auto" | "light" | "dark";
       callback?: (token: string) => void;
       "error-callback"?: () => void;
@@ -166,6 +167,8 @@ export class AssistantSession {
         // Invisible unless Cloudflare actually needs the visitor to click
         appearance: "interaction-only",
         theme: "auto",
+        // The normal widget is a fixed 300px; narrow phones need compact
+        size: container.clientWidth < 310 ? "compact" : "normal",
         callback: (token) => {
           this.waiter?.resolve(token);
           this.waiter = null;
