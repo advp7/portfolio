@@ -46,6 +46,22 @@ const LockIcon = () => (
   </svg>
 );
 
+const ExternalIcon = () => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className="h-3.5 w-3.5 shrink-0 transition-transform duration-300
+    group-hover/live:translate-x-0.5 group-hover/live:-translate-y-0.5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 17L17 7M9 7h8v8" />
+  </svg>
+);
+
 const StackChips: FC<{ stack: string[] }> = ({ stack }) => (
   <ul className="flex flex-wrap gap-2">
     {stack.map((tech) => (
@@ -121,10 +137,25 @@ const FeaturedProject: FC<{
               →
             </span>
           </button>
-          <span className="flex items-center gap-1.5 font-mono text-[11px] text-textMuted">
-            <LockIcon />
-            {study.access}
-          </span>
+          {study.live ? (
+            <a
+              href={study.live.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="group/live inline-flex items-center gap-2 py-2.5 px-5 rounded-full text-sm font-medium
+              text-textPrimary border border-strokeStrong hover:border-accent/60 hover:text-accent
+              hover:-translate-y-0.5 transition-all duration-300"
+            >
+              {study.live.label}
+              <ExternalIcon />
+            </a>
+          ) : (
+            <span className="flex items-center gap-1.5 font-mono text-[11px] text-textMuted">
+              <LockIcon />
+              {study.access}
+            </span>
+          )}
         </div>
       </div>
 

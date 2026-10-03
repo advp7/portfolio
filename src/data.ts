@@ -7,8 +7,10 @@ export interface CaseStudy {
   summary: string;
   metric: { value: string; label: string };
   stack: string[];
-  /** Shown instead of a link — this work lives on client sites / inside products. */
+  /** Where the work lives, e.g. "Live on client site" */
   access: string;
+  /** Public page where visitors can see or try it */
+  live?: { href: string; label: string };
   diagram: DiagramId;
   /** Earlier, separate work for the same client — framing, not this project */
   background?: { label: string; text: string };
@@ -29,6 +31,10 @@ export const caseStudies: CaseStudy[] = [
     metric: { value: "100s", label: "customer queries handled every week" },
     stack: ["React", "Python · FastAPI", "Gemini", "Tool calling", "Redis"],
     access: "Live on client site",
+    live: {
+      href: "https://www.edelweissmf.com",
+      label: "Try Ellie on edelweissmf.com",
+    },
     diagram: "ai-assistant",
     background: {
       label: "Earlier project with Edelweiss",
@@ -55,6 +61,10 @@ export const caseStudies: CaseStudy[] = [
     metric: { value: "~10 days", label: "from being pulled in to launch" },
     stack: ["React", "TypeScript", "State management", "REST APIs"],
     access: "Inside the Engati product",
+    live: {
+      href: "https://www.engati.ai/rcs-business",
+      label: "Explore RCS on engati.ai",
+    },
     diagram: "rcs",
     context:
       "RCS (Rich Communication Services) opened up new use cases and a new revenue stream for Engati. The launch was time-bound and high-visibility, with external dependencies and expectations from Google. It had to go live quickly and establish credibility with Google.",

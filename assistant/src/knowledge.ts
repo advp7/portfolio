@@ -48,7 +48,9 @@ const caseStudyText = caseStudies
       study.summary,
       `Key metric: ${study.metric.value} ${study.metric.label}`,
       `Stack: ${study.stack.join(", ")}`,
-      `Where it lives: ${study.access} (no public demo link)`,
+      study.live
+        ? `Where it lives: ${study.access}. Public page: ${study.live.href} (${study.live.label})`
+        : `Where it lives: ${study.access} (no public link)`,
     ];
     if (study.background) {
       parts.push(

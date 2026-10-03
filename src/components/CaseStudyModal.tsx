@@ -253,9 +253,23 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
                     </li>
                   ))}
                 </ul>
-                <span className="font-mono text-[11px] text-textMuted whitespace-nowrap">
-                  {study.access}
-                </span>
+                {study.live ? (
+                  <a
+                    href={study.live.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full border border-strokeStrong
+                    px-4 py-2 text-sm font-medium text-textPrimary whitespace-nowrap
+                    hover:border-accent/60 hover:text-accent transition-colors"
+                  >
+                    {study.live.label}
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <span className="font-mono text-[11px] text-textMuted whitespace-nowrap">
+                    {study.access}
+                  </span>
+                )}
               </div>
             </div>
             </motion.div>
