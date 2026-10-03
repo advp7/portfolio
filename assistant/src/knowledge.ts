@@ -78,7 +78,10 @@ const skillsText = skillGroups
 
 const statsText = stats
   .map(
-    (stat) => `- ${stat.prefix ?? ""}${stat.value}${stat.suffix ?? ""} ${stat.label}`
+    (stat) =>
+      `- ${stat.prefix ?? ""}${stat.value}${stat.suffix ?? ""}${
+        stat.unit ? ` ${stat.unit}` : ""
+      } ${stat.label} (${stat.tag})`
   )
   .join("\n");
 

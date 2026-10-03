@@ -239,18 +239,47 @@ export interface Stat {
   value: number;
   prefix?: string;
   suffix?: string;
+  /** Rendered smaller, after the number ("days", "yr") */
+  unit?: string;
+  /** Short context line above the label */
+  tag: string;
+  /** Reads as a continuation of the number: "~10 days" + "to ship…" */
   label: string;
+  /** Where the proof lives: a case study, or a page section */
+  proof: { caseStudy: string } | { section: string };
 }
 
-// All figures verifiable from the timeline / experience above.
+// All figures verifiable from the case studies / experience above.
 export const stats: Stat[] = [
-  { value: 4, suffix: "+", label: "Years shipping products" },
-  { value: 100, suffix: "+", label: "Businesses on the platform I build" },
-  { value: 10, label: "Months to Senior promotion" },
   {
     value: 10,
     prefix: "~",
-    label: "Days to ship a Google-partnered launch",
+    unit: "days",
+    tag: "Engati · RCS",
+    label: "to ship a Google-partnered launch",
+    proof: { caseStudy: "rcs" },
+  },
+  {
+    value: 100,
+    suffix: "s",
+    tag: "Edelweiss · Ellie",
+    label: "of customer queries a week, answered by an AI I built",
+    proof: { caseStudy: "ai-assistant" },
+  },
+  {
+    value: 1,
+    prefix: "<",
+    unit: "yr",
+    tag: "2024 → 2025",
+    label: "from UI Developer to Senior",
+    proof: { section: "experience" },
+  },
+  {
+    value: 100,
+    suffix: "+",
+    tag: "Engati",
+    label: "businesses on the platform I build",
+    proof: { section: "experience" },
   },
 ];
 
