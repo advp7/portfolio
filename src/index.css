@@ -447,7 +447,8 @@ html.custom-cursor [contenteditable="true"] {
   inherits: false;
 }
 /* Launcher pill with a slowly orbiting gradient border */
-.ai-launcher::before {
+.ai-launcher::before,
+.ai-orbit-border::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -466,6 +467,20 @@ html.custom-cursor [contenteditable="true"] {
   mask-composite: exclude;
   animation: ai-orbit 4s linear infinite;
   pointer-events: none;
+}
+.ai-orbit-border {
+  position: relative;
+}
+.ai-orbit-border::after {
+  opacity: 0.55;
+  transition: opacity 0.3s;
+}
+.ai-orbit-border:hover::after,
+.ai-orbit-border:focus-within::after {
+  opacity: 1;
+}
+.ai-launcher.is-highlighted {
+  box-shadow: 0 0 0 4px rgb(var(--accent) / 0.18), 0 12px 40px var(--shadow-modal);
 }
 @keyframes ai-orbit {
   to {
@@ -489,6 +504,7 @@ html.custom-cursor [contenteditable="true"] {
 }
 @media (prefers-reduced-motion: reduce) {
   .ai-launcher::before,
+  .ai-orbit-border::after,
   .ai-typing-dot {
     animation: none;
   }

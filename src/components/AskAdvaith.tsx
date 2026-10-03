@@ -22,7 +22,10 @@ import {
   loadTurnstile,
   streamChat,
 } from "../assistant/client";
-import { OPEN_ASSISTANT_EVENT } from "../assistant/config";
+import {
+  HIGHLIGHT_ASSISTANT_EVENT,
+  OPEN_ASSISTANT_EVENT,
+} from "../assistant/config";
 // components
 import { OPEN_CASE_STUDY_EVENT } from "./CommandPalette";
 // intro
@@ -283,6 +286,8 @@ const AskAdvaith = () => {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [highlighted, setHighlighted] = useState(false);
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
 
   const sessionRef = useRef(new AssistantSession());
   const abortRef = useRef<AbortController | null>(null);
@@ -295,11 +300,24 @@ const AskAdvaith = () => {
 
   messagesRef.current = messages;
 
-  // Opened from the command palette (or anything else)
+  // Opened from the command palette or the project card, optionally with
+  // a question to ask straight away
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = (e: Event) => {
+      const question = (e as CustomEvent<{ question?: string } | undefined>)
+        .detail?.question;
+      setHighlighted(false);
+      setOpen(true);
+      if (question) setPendingQuestion(question);
+    };
+    const onHighlight = (e: Event) =>
+      setHighlighted(Boolean((e as CustomEvent<boolean>).detail));
     window.addEventListener(OPEN_ASSISTANT_EVENT, onOpen);
-    return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, onOpen);
+    window.addEventListener(HIGHLIGHT_ASSISTANT_EVENT, onHighlight);
+    return () => {
+      window.removeEventListener(OPEN_ASSISTANT_EVENT, onOpen);
+      window.removeEventListener(HIGHLIGHT_ASSISTANT_EVENT, onHighlight);
+    };
   }, []);
 
   // Focus in on open, back to the launcher on close
@@ -433,6 +451,20 @@ const AskAdvaith = () => {
     }
   };
 
+  // A question handed over from elsewhere on the page (e.g. the project
+  // card) is asked once the panel, and its Turnstile slot, are mounted
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  useEffect(() => {
+    if (!open || !pendingQuestion) return;
+    if (busy) {
+      setInput(pendingQuestion);
+    } else {
+      sendRef.current(pendingQuestion);
+    }
+    setPendingQuestion(null);
+  }, [open, pendingQuestion, busy]);
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     send(input);
@@ -470,13 +502,18 @@ const AskAdvaith = () => {
             onPointerEnter={() => loadTurnstile().catch(() => {})}
             onFocus={() => loadTurnstile().catch(() => {})}
             initial={{ opacity: 0, y: 16, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: highlighted && !shouldReduceMotion ? 1.08 : 1,
+            }}
             exit={{ opacity: 0, y: 16, scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             aria-haspopup="dialog"
-            className="ai-launcher fixed bottom-6 right-6 z-[60] flex h-11 items-center gap-2 rounded-full
+            className={`ai-launcher fixed bottom-6 right-6 z-[60] flex h-11 items-center gap-2 rounded-full
+            ${highlighted ? "is-highlighted" : ""}
             glass pl-3.5 pr-4 text-sm font-medium text-textPrimary
-            shadow-[0_12px_40px_var(--shadow-modal)] hover:-translate-y-0.5 transition-transform"
+            shadow-[0_12px_40px_var(--shadow-modal)] hover:-translate-y-0.5 transition-transform`}
           >
             <span className="text-accent">
               <SparkIcon />
@@ -484,6 +521,25 @@ const AskAdvaith = () => {
             Ask Advaith
             <span className="sr-only"> (AI assistant)</span>
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* "It's right here": answers the project card's hover */}
+      <AnimatePresence>
+        {introDone && !open && highlighted && (
+          <motion.div
+            key="nudge"
+            aria-hidden="true"
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="pointer-events-none fixed bottom-[1.85rem] right-[10.75rem] z-[60] whitespace-nowrap
+            rounded-full bg-accent px-3 py-1 text-xs font-semibold text-onAccent
+            shadow-[0_8px_24px_var(--shadow-modal)]"
+          >
+            It's right here →
+          </motion.div>
         )}
       </AnimatePresence>
 

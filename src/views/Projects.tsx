@@ -21,6 +21,11 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { OPEN_CASE_STUDY_EVENT } from "../components/CommandPalette";
+// assistant
+import {
+  HIGHLIGHT_ASSISTANT_EVENT,
+  OPEN_ASSISTANT_EVENT,
+} from "../assistant/config";
 // utils
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
@@ -137,8 +142,8 @@ const FeaturedProject: FC<{
 const EarlierWorkCard: FC<{ work: EarlierWork }> = ({ work }) => {
   const inner = (
     <div className="flex flex-col gap-3 h-full p-6">
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[11px] text-textMuted">{work.org}</span>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="whitespace-nowrap font-mono text-[11px] text-textMuted">{work.org}</span>
         {work.link ? (
           <svg
             aria-hidden="true"
@@ -155,7 +160,7 @@ const EarlierWorkCard: FC<{ work: EarlierWork }> = ({ work }) => {
           </svg>
         ) : (
           work.access && (
-            <span className="flex items-center gap-1.5 font-mono text-[10px] text-textMuted">
+            <span className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] text-textMuted">
               <LockIcon />
               {work.access}
             </span>
@@ -189,6 +194,135 @@ const EarlierWorkCard: FC<{ work: EarlierWork }> = ({ work }) => {
     </SpotlightCard>
   );
 };
+
+const TRY_QUESTIONS = [
+  "What did Advaith build for Edelweiss?",
+  "Show me the RCS case study",
+];
+
+const openAssistant = (question?: string) =>
+  window.dispatchEvent(
+    new CustomEvent(OPEN_ASSISTANT_EVENT, { detail: { question } })
+  );
+
+const highlightAssistant = (on: boolean) =>
+  window.dispatchEvent(
+    new CustomEvent(HIGHLIGHT_ASSISTANT_EVENT, { detail: on })
+  );
+
+const PIPELINE = [
+  "Your question",
+  "Cloudflare Worker",
+  "Gemini + tools",
+  "Streamed back",
+];
+
+/** The one project here you don't have to take my word for: it's on the page */
+const AskAdvaithCard = () => (
+  <SpotlightCard className="ai-orbit-border group bg-surface border border-stroke rounded-2xl">
+    <div
+      onMouseEnter={() => highlightAssistant(true)}
+      onMouseLeave={() => highlightAssistant(false)}
+      onFocus={() => highlightAssistant(true)}
+      onBlur={() => highlightAssistant(false)}
+      className="grid grid-cols-1 lg:grid-cols-[1.25fr_1fr] gap-8 p-6 sm:p-8"
+    >
+      {/* The story */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="font-mono text-[11px] text-textMuted">
+            Side project · 2026
+          </span>
+          <span className="flex items-center gap-1.5 font-mono text-[10px] text-accent">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-60 animate-ping motion-reduce:animate-none" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+            </span>
+            Live on this page
+          </span>
+        </div>
+        <h4 className="font-display text-xl sm:text-2xl font-semibold text-textPrimary">
+          Ask Advaith: an AI assistant you can try right now
+        </h4>
+        <p className="text-sm sm:text-base text-textSecondary leading-relaxed">
+          The chat in the corner of this page is a project too. It answers
+          questions about my work from the same data this site is built from,
+          and uses tool calls to open case studies or hand over my resume. It
+          runs entirely on free tiers, with a fallback model, bot protection
+          and rate limits.
+        </p>
+        <ol
+          aria-label="How a question travels"
+          className="flex flex-wrap items-center gap-x-1.5 gap-y-2 font-mono text-[11px]"
+        >
+          {PIPELINE.map((step, i) => (
+            <li key={step} className="flex items-center gap-1.5">
+              <span className="rounded-md border border-stroke px-2 py-1 text-textSecondary">
+                {step}
+              </span>
+              {i < PIPELINE.length - 1 && (
+                <span aria-hidden="true" className="text-accent">
+                  →
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+        <div className="mt-auto pt-2">
+          <StackChips
+            stack={["Cloudflare Workers", "Gemini", "Tool calling", "Streaming", "Turnstile"]}
+          />
+        </div>
+      </div>
+
+      {/* The invitation: looks like the chat it opens */}
+      <div className="flex flex-col gap-4 rounded-xl border border-stroke bg-night/60 p-5">
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="flex h-7 w-7 items-center justify-center rounded-full
+            bg-gradient-to-br from-accent to-accentAlt text-onAccent text-xs"
+          >
+            ✦
+          </span>
+          <span className="text-sm font-semibold text-textPrimary">Ask Advaith</span>
+        </div>
+        <p className="max-w-[90%] rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 text-sm text-textSecondary">
+          Hi! Ask me anything about Advaith's work. I can also open a case
+          study for you.
+        </p>
+        <div className="flex flex-col gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-textMuted">
+            Try asking
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {TRY_QUESTIONS.map((question) => (
+              <button
+                key={question}
+                type="button"
+                onClick={() => openAssistant(question)}
+                className="rounded-full border border-stroke bg-surface px-3 py-1.5 text-left text-xs text-textSecondary
+                hover:border-accent/60 hover:text-textPrimary transition-colors"
+              >
+                “{question}”
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => openAssistant()}
+          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full
+          bg-gradient-to-r from-accent to-accentAlt px-6 py-3 text-sm font-medium text-onAccent
+          hover:shadow-[0_0_32px_rgba(56,189,248,0.35)] hover:-translate-y-0.5 transition-all duration-300"
+        >
+          Try it now
+          <span aria-hidden="true">↘</span>
+        </button>
+      </div>
+    </div>
+  </SpotlightCard>
+);
 
 const Projects = () => {
   // fromCard: opened by clicking a card (morph from it) vs. the command menu
@@ -234,7 +368,8 @@ const Projects = () => {
             <p className="text-center xl:text-left text-base sm:text-lg text-textSecondary leading-relaxed">
               Most of my best work lives inside products and on client sites,
               so instead of links, here's how it was built: the problem, what I
-              owned, and what it delivered.
+              owned, and what it delivered. And one you can try for yourself:
+              the AI assistant on this page.
             </p>
           </Reveal>
         </div>
@@ -273,14 +408,23 @@ const Projects = () => {
 
         <div className="flex flex-col gap-6">
           <h3 className="font-mono text-xs tracking-[0.2em] uppercase text-textMuted">
-            Earlier work
+            More work
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-6">
+            <motion.div
+              variants={fadeIn("up")}
+              transition={transition()}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+            >
+              <AskAdvaithCard />
+            </motion.div>
             {earlierWork.map((work, index) => (
               <motion.div
                 key={work.id}
                 variants={fadeIn("up")}
-                transition={transition(index * 0.1)}
+                transition={transition((index + 1) * 0.1)}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-60px" }}

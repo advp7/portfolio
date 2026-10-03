@@ -7,5 +7,8 @@ export const ASSISTANT_URL =
 export const TURNSTILE_SITE_KEY =
   process.env.REACT_APP_TURNSTILE_SITE_KEY || "0x4AAAAAAFL7EiqfIE5GMsZl";
 
-/** Fired by the command palette (and anything else) to open the assistant */
+/** Opens the assistant. Optional detail: { question } to ask straight away */
 export const OPEN_ASSISTANT_EVENT = "open-assistant";
+
+/** detail: boolean. Makes the corner launcher call attention to itself */
+export const HIGHLIGHT_ASSISTANT_EVENT = "highlight-assistant";

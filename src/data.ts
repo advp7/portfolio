@@ -85,24 +85,14 @@ export interface EarlierWork {
 
 export const earlierWork: EarlierWork[] = [
   {
-    id: "infinitybox-dashboard",
-    title: "Partner operations dashboard",
-    org: "InfinityBox",
+    id: "infinitybox",
+    title: "Partner dashboard & customer flows",
+    org: "InfinityBox · 2022–2024",
     description:
-      "Owned the frontend of InfinityBox's operations and data-entry dashboard, used by teams at Swiggy and Zomato during partner collaborations. Built directly with the CTO and founders.",
+      "Owned the frontend of InfinityBox's operations dashboard and its mobile-first customer opt-in and feedback flows, used by teams at Swiggy and Zomato during partner collaborations. Built directly with the CTO and founders.",
     stack: ["React", "TypeScript", "Redux Toolkit", "Material UI"],
     tag: "Professional",
     access: "Internal product",
-  },
-  {
-    id: "infinitybox-customer-flows",
-    title: "Customer opt-in & feedback flows",
-    org: "InfinityBox",
-    description:
-      "Mobile-first opt-in and feedback journeys for end customers, built for the Swiggy integration and designed for fast loads and high completion on phones.",
-    stack: ["React", "TypeScript", "REST APIs"],
-    tag: "Professional",
-    access: "Client-facing product",
   },
 ];
 
