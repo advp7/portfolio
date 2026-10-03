@@ -672,6 +672,7 @@ const AskAdvaith = () => {
       };
 
   const shortcut = isMac() ? "⌘J" : "Ctrl J";
+  const orbLayoutId = shouldReduceMotion ? undefined : "assistant-orb";
 
   return createPortal(
     <>
@@ -760,10 +761,16 @@ const AskAdvaith = () => {
           >
             <div aria-hidden="true" className="ai-aurora pointer-events-none absolute inset-x-0 top-0 h-56" />
 
-            {/* Header */}
-            <div className="relative flex items-center gap-3 px-4 pt-4 pb-3">
-              <Orb size={38} state={orbState} />
-              <div className="min-w-0 flex-1">
+            {/* Header. The orb only lives here once a conversation starts;
+                before that it's the big one in the welcome screen, and it
+                glides between the two (shared layoutId). */}
+            <div className="relative flex min-h-[70px] items-center gap-3 px-4 pt-4 pb-3">
+              {messages.length > 0 && (
+                <motion.span layoutId={orbLayoutId} className="flex shrink-0">
+                  <Orb size={38} state={orbState} />
+                </motion.span>
+              )}
+              <motion.div layout={shouldReduceMotion ? false : "position"} className="min-w-0 flex-1">
                 <p className="font-display font-semibold leading-tight text-textPrimary">
                   Ask Advaith
                 </p>
@@ -773,7 +780,7 @@ const AskAdvaith = () => {
                   )}
                   {status}
                 </p>
-              </div>
+              </motion.div>
               {canSpeak && (
                 <HeaderButton
                   label={speakReplies ? "Stop reading replies aloud" : "Read replies aloud"}
@@ -821,7 +828,9 @@ const AskAdvaith = () => {
               {messages.length === 0 ? (
                 <div className="flex min-h-full flex-col justify-center gap-6 py-4">
                   <div className="flex flex-col items-center gap-4 text-center">
-                    <Orb size={76} state={orbState} />
+                    <motion.span layoutId={orbLayoutId} className="flex">
+                      <Orb size={76} state={orbState} />
+                    </motion.span>
                     <div className="flex flex-col gap-1.5">
                       <h3 className="font-display text-xl font-semibold text-textPrimary">
                         <span className="gradient-text">Ask me anything</span> about
