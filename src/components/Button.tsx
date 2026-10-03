@@ -8,6 +8,7 @@ interface ButtonProps {
   onClick?: () => void;
   href?: string;
   type?: "button" | "submit";
+  disabled?: boolean;
 }
 
 const Button: FC<ButtonProps> = ({
@@ -17,6 +18,7 @@ const Button: FC<ButtonProps> = ({
   onClick,
   href,
   type = "button",
+  disabled,
 }) => {
   const className = secondary
     ? `inline-flex items-center justify-center gap-2.5 py-3 px-8 rounded-full font-medium text-base
@@ -50,7 +52,12 @@ const Button: FC<ButtonProps> = ({
   }
 
   return (
-    <button type={type} onClick={onClick} className={className}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${className} disabled:opacity-60 disabled:pointer-events-none`}
+    >
       {content}
     </button>
   );
