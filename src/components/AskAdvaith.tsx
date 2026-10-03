@@ -1047,7 +1047,7 @@ const AskAdvaith = () => {
                 )}
               </div>
               <p className="mt-2 text-center text-[11px] leading-snug text-textMuted">
-                AI-generated answers can be wrong.
+                AI answers, grounded in Advaith's portfolio
               </p>
             </form>
           </motion.div>

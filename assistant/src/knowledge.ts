@@ -24,10 +24,10 @@ const RESUME_URL = "https://advp7.github.io/portfolio/CV_ADVAITH.pdf";
 const list = (items: string[]) => items.map((item) => `- ${item}`).join("\n");
 
 const profile = `Name: Advaith Praveen
-Refer to Advaith by name, or as "they" when a pronoun is needed.
+Pronouns: he/him. Refer to Advaith by name, or as "he"/"him"/"his".
 Location: Bengaluru, India.
 Current role: Senior UI Developer at Engati Technologies, a conversational-AI and customer-experience platform. Joined as UI Developer in Mar 2024 and was promoted to Senior UI Developer in Jan 2025, 10 months in. Selected for Engati's bar-raisers program.
-Positioning: a frontend-leaning full-stack engineer with 4+ years of experience. Frontend (React, TypeScript) is the core; Advaith also ships backend services in Java (Spring Boot) and Python (FastAPI) with Redis and AWS, so they can own a feature end to end. Current focus is AI: AI assistants, agents, LLM tool calling and CX automation that ship to production.
+Positioning: a frontend-leaning full-stack engineer with 4+ years of experience. Frontend (React, TypeScript) is the core; Advaith also ships backend services in Java (Spring Boot) and Python (FastAPI) with Redis and AWS, so he can own a feature end to end. Current focus is AI: AI assistants, agents, LLM tool calling and CX automation that ship to production.
 Way of working: AI is part of how Advaith works every day, using AI coding tools such as Claude Code and Codex for AI-assisted development.`;
 
 const aboutThisSite = `This portfolio is built with React, TypeScript, Tailwind CSS and Framer Motion and hosted on GitHub Pages. This assistant ("Ask Advaith") was built by Advaith: a Cloudflare Worker that calls Google Gemini with tool calling, falls back to Cloudflare Workers AI when the free quota runs out, and is protected by Cloudflare Turnstile and rate limits. It runs entirely on free tiers.`;
