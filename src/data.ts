@@ -245,7 +245,7 @@ export interface Stat {
 // All figures verifiable from the timeline / experience above.
 export const stats: Stat[] = [
   { value: 4, suffix: "+", label: "Years shipping products" },
-  { value: 6, label: "Brands that used what I built" },
+  { value: 100, suffix: "+", label: "Businesses on the platform I build" },
   { value: 10, label: "Months to Senior promotion" },
   {
     value: 10,
