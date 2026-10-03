@@ -12,7 +12,7 @@ import {
   SocialMediaIcon,
 } from "../components";
 // intro
-import { HEADLINE_CLASSES, useIntro } from "../intro";
+import { HEADLINE_CLASSES, HI_DELAY_S, useIntro } from "../intro";
 // data
 import { socials } from "../data";
 // framer-motion
@@ -103,14 +103,21 @@ const Hero = () => {
                 })}
             className={`text-center xl:text-left ${HEADLINE_CLASSES}`}
           >
-            {/* After the intro's name lands, "Hi," slides in beside it */}
+            {/* As the intro's name glides in, "Hi," slides in beside it */}
             <motion.span
               className="inline-block"
               {...(intro.active
                 ? {
-                    initial: { opacity: 0, x: -16 },
-                    animate: intro.done ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 },
-                    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                    initial: { opacity: 0, x: -20, filter: "blur(6px)" },
+                    animate: intro.revealed
+                      ? { opacity: 1, x: 0, filter: "blur(0px)" }
+                      : { opacity: 0, x: -20, filter: "blur(6px)" },
+                    transition: {
+                      duration: 0.6,
+                      ease: [0.16, 1, 0.3, 1],
+                      // Skipped intros (revealed and done together) don't wait
+                      delay: intro.done ? 0 : HI_DELAY_S,
+                    },
                   }
                 : {})}
             >

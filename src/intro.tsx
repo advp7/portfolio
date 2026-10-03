@@ -14,9 +14,19 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 const GREETINGS = ["Hello", "ನಮಸ್ಕಾರ", "नमस्ते"];
-const WORD_MS = 320;
-const HOLD_MS = 380;
-const FLY_MS = 650;
+const WORD_MS = 400;
+const HOLD_MS = 450;
+const FLY_MS = 850;
+/** Smooth start and stop for the flight onto the headline */
+const FLY_EASE = [0.76, 0, 0.24, 1] as const;
+/** Each word blurs in from below and out upwards, overlapping the next */
+const WORD_IN = { opacity: 0, y: 18, filter: "blur(8px)" };
+const WORD_SHOWN = { opacity: 1, y: 0, filter: "blur(0px)" };
+const WORD_OUT = { opacity: 0, y: -18, filter: "blur(8px)" };
+const WORD_FADE = { duration: 0.38, ease: [0.16, 1, 0.3, 1] as const };
+
+/** Hero starts its "Hi," this far into the flight, so the two overlap */
+export const HI_DELAY_S = (FLY_MS * 0.55) / 1000;
 
 // Same type classes as the hero <h1>, so the overlay's final line lays out
 // identically to the real headline and only needs to slide into place
@@ -203,49 +213,55 @@ const IntroOverlay: FC<{
     <motion.div
       className="fixed inset-0 z-[90]"
       onPointerDown={skip}
-      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+      // The landed line sits exactly on the real headline, so swap instantly:
+      // a fade here would briefly show both copies
+      exit={{ opacity: 0, transition: { duration: 0 } }}
     >
       {/* Backdrop fades away as the name flies, revealing the site */}
       <motion.div
         aria-hidden="true"
         className="absolute inset-0 bg-night"
         animate={{ opacity: phase === "fly" ? 0 : 1 }}
-        transition={{ duration: FLY_MS / 1000, ease: "easeInOut" }}
+        transition={{ duration: FLY_MS / 1000, ease: FLY_EASE }}
       />
 
+      {/* Words stack in one grid cell so outgoing and incoming overlap */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center px-6 sm:px-12"
+        className="absolute inset-0 grid place-items-center px-6 sm:px-12"
       >
+        <AnimatePresence initial={false}>
         {phase === "words" ? (
           <motion.p
             key={wordIndex}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`${HEADLINE_CLASSES} text-center`}
+            initial={WORD_IN}
+            animate={WORD_SHOWN}
+            exit={WORD_OUT}
+            transition={WORD_FADE}
+            className={`${HEADLINE_CLASSES} text-center [grid-area:1/1]`}
           >
             {GREETINGS[wordIndex]}
           </motion.p>
         ) : (
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            key="name"
+            initial={WORD_IN}
             animate={
               phase === "fly"
-                ? { opacity: 1, x: offset.x, y: offset.y }
-                : { opacity: 1, x: 0, y: 0 }
+                ? { ...WORD_SHOWN, x: offset.x, y: offset.y }
+                : WORD_SHOWN
             }
             transition={
               phase === "fly"
-                ? { duration: FLY_MS / 1000, ease: [0.65, 0, 0.35, 1] }
-                : { duration: 0.2, ease: "easeOut" }
+                ? { duration: FLY_MS / 1000, ease: FLY_EASE }
+                : WORD_FADE
             }
             style={
               frame
                 ? { width: frame.width, textAlign: frame.align as "left" }
                 : undefined
             }
-            className={HEADLINE_CLASSES}
+            className={`${HEADLINE_CLASSES} [grid-area:1/1]`}
           >
             {/* The greetings already said hello, so the name lands on its
                 own; the hero adds its "Hi," once it's there */}
@@ -254,6 +270,7 @@ const IntroOverlay: FC<{
             </span>
           </motion.div>
         )}
+        </AnimatePresence>
       </div>
 
       <button
