@@ -14,6 +14,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { caseStudies, socials } from "../data";
 // theme
 import { useTheme } from "../theme";
+// assistant
+import { OPEN_ASSISTANT_EVENT } from "../assistant/config";
 
 interface Command {
   id: string;
@@ -85,6 +87,13 @@ const CommandPalette = () => {
             new CustomEvent(OPEN_CASE_STUDY_EVENT, { detail: study.id })
           ),
       })),
+      {
+        id: "ask-advaith",
+        group: "Actions",
+        label: "Ask Advaith (AI assistant)",
+        keywords: "ai chat question bot help",
+        run: () => window.dispatchEvent(new Event(OPEN_ASSISTANT_EVENT)),
+      },
       {
         id: "copy-email",
         group: "Actions",

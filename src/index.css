@@ -439,3 +439,57 @@ html.custom-cursor [contenteditable="true"] {
     transparent 100%
   );
 }
+
+/* ------------------------------------------------------- Ask Advaith */
+@property --ai-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+/* Launcher pill with a slowly orbiting gradient border */
+.ai-launcher::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--ai-angle),
+    rgb(var(--accent)),
+    rgb(var(--accent-alt)),
+    rgb(var(--accent) / 0.15) 40%,
+    rgb(var(--accent) / 0.15) 70%,
+    rgb(var(--accent))
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ai-orbit 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes ai-orbit {
+  to {
+    --ai-angle: 360deg;
+  }
+}
+@keyframes ai-typing {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.ai-typing-dot {
+  animation: ai-typing 1.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-launcher::before,
+  .ai-typing-dot {
+    animation: none;
+  }
+}

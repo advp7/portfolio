@@ -1,0 +1,36 @@
+# Ask Advaith: chat backend for the portfolio.
+# Deployed URL: https://chat.askadvaith.workers.dev
+name = "chat"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://advp7.github.io,http://localhost:3000"
+# Gemini 3.x: thinking can't be turned off, only lowered. Valid levels vary
+# by model (3.5-flash-lite: minimal|low|medium|high; 3.8-flash: low|medium|high)
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_THINKING_LEVEL = "minimal"
+FALLBACK_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never committed):
+#   GEMINI_API_KEY
+#   TURNSTILE_SECRET_KEY
+
+# Workers AI: free fallback when Gemini's free quota runs out
+[ai]
+binding = "AI"
+
+# Per-IP rate limits (period must be 10 or 60 seconds)
+[[ratelimits]]
+name = "CHAT_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "SESSION_LIMITER"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
+[observability]
+enabled = true

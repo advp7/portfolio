@@ -13,6 +13,7 @@ import {
 
 // components
 import {
+  AskAdvaith,
   BackToTop,
   CommandPalette,
   CustomCursor,
@@ -43,6 +44,7 @@ function App() {
       <Footer />
       <BackToTop />
       <CommandPalette />
+      <AskAdvaith />
       <CustomCursor />
     </div>
   );

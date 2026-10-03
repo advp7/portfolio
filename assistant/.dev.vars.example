@@ -1,0 +1,3 @@
+# Copy to .dev.vars (gitignored) for local `npm run dev`, then fill in.
+GEMINI_API_KEY=
+TURNSTILE_SECRET_KEY=
