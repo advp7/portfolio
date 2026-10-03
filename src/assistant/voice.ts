@@ -214,6 +214,21 @@ export const speak = (
   synth.speak(utterance);
 };
 
+let unlocked = false;
+
+/**
+ * iOS Safari only lets speech start from a tap. Replies arrive seconds after
+ * the tap, so call this inside the tap handler: a silent utterance unlocks
+ * speech for the rest of the session.
+ */
+export const unlockSpeech = () => {
+  if (unlocked || !speechOutputSupported()) return;
+  unlocked = true;
+  const silent = new SpeechSynthesisUtterance(" ");
+  silent.volume = 0;
+  window.speechSynthesis.speak(silent);
+};
+
 export const stopSpeaking = () => {
   if (speechOutputSupported()) window.speechSynthesis.cancel();
 };

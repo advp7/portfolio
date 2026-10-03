@@ -33,6 +33,7 @@ import {
   speak,
   speechOutputSupported,
   stopSpeaking,
+  unlockSpeech,
   useVoiceInput,
   voiceInputSupported,
   warmUpVoices,
@@ -619,6 +620,7 @@ const AskAdvaith = () => {
       setSpeaking(false);
     } else {
       userMuted.current = false;
+      unlockSpeech(); // still inside the tap, as iOS requires
     }
     setSpeakReplies((s) => !s);
   };
@@ -629,6 +631,9 @@ const AskAdvaith = () => {
     } else {
       stopSpeaking();
       setSpeaking(false);
+      // Spoken questions get spoken replies; unlock speech while we still
+      // have the tap (iOS), before voice.start() awaits the mic
+      unlockSpeech();
       voice.start();
     }
   };
