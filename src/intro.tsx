@@ -20,8 +20,9 @@ const FLY_MS = 650;
 
 // Same type classes as the hero <h1>, so the overlay's final line lays out
 // identically to the real headline and only needs to slide into place
+// (One step smaller below 420px so "I'm Advaith." fits a 320px phone.)
 export const HEADLINE_CLASSES =
-  "font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-textPrimary leading-[1.05]";
+  "font-display text-[2.75rem] xs:text-5xl sm:text-6xl lg:text-7xl font-bold text-textPrimary leading-[1.05]";
 
 /**
  * Plays on every page load and reload. The only exception is reduced motion:
@@ -37,7 +38,7 @@ interface IntroContextValue {
   revealed: boolean;
   /** The greeting has landed — the real headline takes over */
   done: boolean;
-  /** Hero attaches this to its "Hi, I'm Advaith." line */
+  /** Hero attaches this to the "I'm Advaith." part of its headline */
   greetingRef: RefObject<HTMLSpanElement>;
 }
 
@@ -246,8 +247,10 @@ const IntroOverlay: FC<{
             }
             className={HEADLINE_CLASSES}
           >
-            <span ref={overlayLineRef}>
-              Hi, I'm <span className="gradient-text">Advaith.</span>
+            {/* The greetings already said hello, so the name lands on its
+                own; the hero adds its "Hi," once it's there */}
+            <span ref={overlayLineRef} className="whitespace-nowrap">
+              I'm <span className="gradient-text">Advaith.</span>
             </span>
           </motion.div>
         )}

@@ -12,7 +12,7 @@ import {
   SocialMediaIcon,
 } from "../components";
 // intro
-import { useIntro } from "../intro";
+import { HEADLINE_CLASSES, useIntro } from "../intro";
 // data
 import { socials } from "../data";
 // framer-motion
@@ -101,13 +101,29 @@ const Hero = () => {
                   whileInView: "visible",
                   viewport: { once: true },
                 })}
-            className="text-center xl:text-left font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-textPrimary leading-[1.05]"
+            className={`text-center xl:text-left ${HEADLINE_CLASSES}`}
           >
+            {/* After the intro's name lands, "Hi," slides in beside it */}
+            <motion.span
+              className="inline-block"
+              {...(intro.active
+                ? {
+                    initial: { opacity: 0, x: -16 },
+                    animate: intro.done ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 },
+                    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                  }
+                : {})}
+            >
+              Hi,
+            </motion.span>{" "}
+            {/* Kept as one unit: on phones it wraps as "Hi," / "I'm Advaith.",
+                matching the intro's single line exactly */}
             <span
               ref={intro.greetingRef}
+              className="whitespace-nowrap"
               style={{ visibility: intro.done ? undefined : "hidden" }}
             >
-              Hi, I'm <span className="gradient-text">Advaith.</span>
+              I'm <span className="gradient-text">Advaith.</span>
             </span>
             <br />
             <motion.span
