@@ -10,8 +10,5 @@ export { default as SpotlightCard } from "./SpotlightCard";
 export { default as RotatingText } from "./RotatingText";
 export { default as CountUp } from "./CountUp";
 export { default as ArchitectureDiagram } from "./ArchitectureDiagram";
-export { default as CaseStudyModal } from "./CaseStudyModal";
 export { default as NodeNetwork } from "./NodeNetwork";
-export { default as CommandPalette } from "./CommandPalette";
 export { default as CustomCursor } from "./CustomCursor";
-export { default as AskAdvaith } from "./AskAdvaith";

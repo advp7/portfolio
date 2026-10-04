@@ -27,9 +27,9 @@ const inlineHashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
 const policy = [
   "default-src 'self'",
   `script-src 'self' ${inlineHashes.join(" ")} ${TURNSTILE}`,
-  // framer-motion animates via inline style attributes
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  // framer-motion animates via inline style attributes; fonts are self-hosted
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data:",
   `connect-src 'self' ${ASSISTANT} ${TURNSTILE} ${FORMS}`,
   `frame-src ${TURNSTILE}`,

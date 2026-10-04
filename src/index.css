@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+/* Fonts are self-hosted: see the @font-face rules in public/index.html */
 
 @tailwind base;
 @tailwind components;
@@ -17,7 +17,8 @@
   --panel-mine: 12 26 43;
   --text-primary: 241 245 249;
   --text-secondary: 148 163 184;
-  --text-muted: 100 116 139;
+  /* 114 128 150 keeps muted text above 4.5:1 on both night and panel */
+  --text-muted: 114 128 150;
   --accent: 56 189 248;
   --accent-alt: 45 212 191;
   --accent-dim: 56 189 248;

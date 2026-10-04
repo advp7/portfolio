@@ -14,6 +14,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { caseStudies, socials } from "../data";
 // theme
 import { useTheme } from "../theme";
+// events
+import { OPEN_CASE_STUDY_EVENT, OPEN_PALETTE_EVENT } from "../events";
 // assistant
 import { OPEN_ASSISTANT_EVENT } from "../assistant/config";
 
@@ -25,14 +27,6 @@ interface Command {
   run: () => void;
 }
 
-/** Fired by the nav hint button (and anything else) to open the palette */
-export const OPEN_PALETTE_EVENT = "open-command-palette";
-/** Fired by the palette; Projects listens and opens the matching case study */
-export const OPEN_CASE_STUDY_EVENT = "open-case-study";
-
-export const isMac = () =>
-  typeof navigator !== "undefined" &&
-  /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
 
 const scrollToSection = (id: string) => {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -25,6 +25,7 @@ import {
   streamChat,
 } from "../assistant/client";
 import {
+  ASSISTANT_URL,
   HIGHLIGHT_ASSISTANT_EVENT,
   OPEN_ASSISTANT_EVENT,
 } from "../assistant/config";
@@ -39,7 +40,7 @@ import {
   warmUpVoices,
 } from "../assistant/voice";
 // components
-import { OPEN_CASE_STUDY_EVENT, isMac } from "./CommandPalette";
+import { OPEN_CASE_STUDY_EVENT, isMac } from "../events";
 // intro
 import { useIntro } from "../intro";
 
@@ -79,7 +80,7 @@ const SUGGESTIONS: { icon: ReactNode; text: string }[] = [
         <path d="M12 15l-3-3a22 22 0 012-4A12.9 12.9 0 0122 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 01-4 2z" />
       </>
     ),
-    text: "Tell me about the RCS launch",
+    text: "What's his biggest win so far?",
   },
   {
     icon: (
@@ -111,6 +112,20 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 const RESUME_HREF = `${process.env.PUBLIC_URL}/CV_ADVAITH.pdf`;
+
+/** On first sign of intent: load Turnstile and open the connection to the
+ *  assistant's Worker early, so the first answer doesn't wait on DNS/TLS */
+let warmedUp = false;
+const warmUp = () => {
+  loadTurnstile().catch(() => {});
+  if (warmedUp) return;
+  warmedUp = true;
+  const link = document.createElement("link");
+  link.rel = "preconnect";
+  link.href = ASSISTANT_URL;
+  link.crossOrigin = "anonymous";
+  document.head.appendChild(link);
+};
 
 const isSmallScreen = () => window.matchMedia("(max-width: 639px)").matches;
 
@@ -938,8 +953,8 @@ const AskAdvaith = () => {
             type="button"
             onClick={() => setOpen(true)}
             // Warm up Turnstile as soon as the visitor shows intent
-            onPointerEnter={() => loadTurnstile().catch(() => {})}
-            onFocus={() => loadTurnstile().catch(() => {})}
+            onPointerEnter={warmUp}
+            onFocus={warmUp}
             initial={{ opacity: 0, y: 16, scale: 0.9 }}
             animate={{
               opacity: 1,

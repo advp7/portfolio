@@ -1,5 +1,4 @@
 // assets
-import profilePic from "../assets/profile-pic.png";
 import downloadIcon from "../assets/download-btn-icon.svg";
 import linkedinIcon from "../assets/linkedin-icon.svg";
 import githubIcon from "../assets/github-icon.svg";
@@ -233,10 +232,19 @@ const Hero = () => {
                 }}
               />
               <div className="relative rounded-full overflow-hidden bg-night">
+                {/* Largest paint on the page: right-sized WebP, preloaded from
+                    index.html, with fixed dimensions so nothing shifts */}
                 <img
-                  src={profilePic}
+                  src={`${process.env.PUBLIC_URL}/images/profile-400.webp`}
+                  srcSet={`${process.env.PUBLIC_URL}/images/profile-400.webp 400w, ${process.env.PUBLIC_URL}/images/profile-600.webp 600w`}
+                  sizes="(min-width: 1170px) 394px, (min-width: 640px) 334px, 254px"
+                  width={394}
+                  height={394}
                   alt="Portrait of Advaith Praveen"
-                  className="block max-w-[254px] sm:max-w-[334px] xl:max-w-[394px] rounded-full"
+                  decoding="async"
+                  // React 18's types predate fetchpriority; browsers support it
+                  {...({ fetchpriority: "high" } as Record<string, string>)}
+                  className="block aspect-square h-auto w-[254px] sm:w-[334px] xl:w-[394px] rounded-full"
                 />
               </div>
             </div>

@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 // components
 import ThemeToggle from "./ThemeToggle";
-import { OPEN_PALETTE_EVENT, isMac } from "./CommandPalette";
+import { OPEN_PALETTE_EVENT, isMac } from "../events";
 // data
 import { navLinks } from "../data";
 

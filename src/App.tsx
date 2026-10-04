@@ -11,17 +11,20 @@ import {
   Stats,
 } from "./views";
 
+// react
+import { Suspense, lazy } from "react";
+
 // components
-import {
-  AskAdvaith,
-  BackToTop,
-  CommandPalette,
-  CustomCursor,
-  Navbar,
-  ScrollProgress,
-} from "./components";
+import { BackToTop, CustomCursor, Navbar, ScrollProgress } from "./components";
+import { useIdle } from "./useIdle";
+
+// Not needed for the first paint: fetched in their own chunks once the
+// browser is idle (the assistant's launcher only appears after the intro)
+const AskAdvaith = lazy(() => import("./components/AskAdvaith"));
+const CommandPalette = lazy(() => import("./components/CommandPalette"));
 
 function App() {
+  const idle = useIdle();
   return (
     <div className="relative overflow-x-clip">
       {/* Ambient background: dot grid + fixed gradient glows */}
@@ -43,8 +46,12 @@ function App() {
       </main>
       <Footer />
       <BackToTop />
-      <CommandPalette />
-      <AskAdvaith />
+      {idle && (
+        <Suspense fallback={null}>
+          <CommandPalette />
+          <AskAdvaith />
+        </Suspense>
+      )}
       <CustomCursor />
     </div>
   );

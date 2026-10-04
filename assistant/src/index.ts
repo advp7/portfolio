@@ -222,18 +222,25 @@ async function* readSse(body: ReadableStream<Uint8Array>) {
 // short-lived signed session that covers the rest of the conversation.
 
 /** Separate HMAC keys per purpose, all derived from the Turnstile secret */
-const hmacKey = async (env: Env, purpose: "session" | "reply") => {
-  const raw = await crypto.subtle.digest(
-    "SHA-256",
-    encoder.encode(`ask-advaith-${purpose}:${env.TURNSTILE_SECRET_KEY}`)
-  );
-  return crypto.subtle.importKey(
-    "raw",
-    raw,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"]
-  );
+// Keys are derived once per isolate and reused across requests (keyed by
+// the secret too, so a rotated secret takes effect immediately)
+const keyCache = new Map<string, Promise<CryptoKey>>();
+
+const hmacKey = (env: Env, purpose: "session" | "reply") => {
+  const material = `ask-advaith-${purpose}:${env.TURNSTILE_SECRET_KEY}`;
+  let key = keyCache.get(material);
+  if (!key) {
+    key = crypto.subtle
+      .digest("SHA-256", encoder.encode(material))
+      .then((raw) =>
+        crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, [
+          "sign",
+          "verify",
+        ])
+      );
+    keyCache.set(material, key);
+  }
+  return key;
 };
 
 const hmacSign = async (env: Env, purpose: "session" | "reply", text: string) =>

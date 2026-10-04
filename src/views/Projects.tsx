@@ -1,6 +1,8 @@
 // react
 import {
   FC,
+  Suspense,
+  lazy,
   useCallback,
   useEffect,
   useState,
@@ -8,11 +10,12 @@ import {
 // components
 import {
   ArchitectureDiagram,
-  CaseStudyModal,
   SectionHeading,
   Reveal,
   SpotlightCard,
 } from "../components";
+import { useIdle } from "../useIdle";
+
 // data
 import { CaseStudy, EarlierWork, caseStudies, earlierWork } from "../data";
 // framer-motion
@@ -20,7 +23,7 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
-import { OPEN_CASE_STUDY_EVENT } from "../components/CommandPalette";
+import { OPEN_CASE_STUDY_EVENT } from "../events";
 // assistant
 import Orb from "../assistant/Orb";
 import {
@@ -30,6 +33,9 @@ import {
 // utils
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
+
+// Its own chunk, fetched once the page is idle (or on the first open)
+const CaseStudyModal = lazy(() => import("../components/CaseStudyModal"));
 
 const LockIcon = () => (
   <svg
@@ -354,6 +360,7 @@ const AskAdvaithCard = () => (
 );
 
 const Projects = () => {
+  const idle = useIdle();
   // fromCard: opened by clicking a card (morph from it) vs. the command menu
   const [open, setOpen] = useState<{
     study: CaseStudy;
@@ -465,11 +472,15 @@ const Projects = () => {
         </div>
       </div>
 
-      <CaseStudyModal
-        study={open?.study ?? null}
-        layoutId={open?.fromCard ? layoutIdFor(open.study) : undefined}
-        onClose={handleClose}
-      />
+      {(idle || open) && (
+        <Suspense fallback={null}>
+          <CaseStudyModal
+            study={open?.study ?? null}
+            layoutId={open?.fromCard ? layoutIdFor(open.study) : undefined}
+            onClose={handleClose}
+          />
+        </Suspense>
+      )}
     </section>
   );
 };

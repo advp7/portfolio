@@ -1,9 +1,10 @@
 // assets
-import swiggyImg from "../assets/swiggy.png";
-import zomatoImg from "../assets/zomato.png";
-import cypherockImg from "../assets/cypherock.png";
+// Raster logos are WebP at 2x their 56px display height
+import swiggyImg from "../assets/swiggy.webp";
+import zomatoImg from "../assets/zomato.webp";
+import cypherockImg from "../assets/cypherock.webp";
 import mamaketoImg from "../assets/mamaketo.svg";
-import o4hImg from "../assets/o4h.png";
+import o4hImg from "../assets/o4h.webp";
 import edelweissImg from "../assets/edelweiss_logo.svg";
 
 // react
@@ -21,14 +22,21 @@ import {
   useVelocity,
 } from "framer-motion";
 
-// invertOnDark: logo artwork is black, so it vanishes on the dark theme
-const clients: { name: string; img: string; invertOnDark?: boolean }[] = [
-  { name: "Swiggy", img: swiggyImg },
-  { name: "Zomato", img: zomatoImg },
-  { name: "Edelweiss", img: edelweissImg },
-  { name: "Cypherock", img: cypherockImg, invertOnDark: true },
-  { name: "Mamaketo", img: mamaketoImg, invertOnDark: true },
-  { name: "O4H — Order for Health", img: o4hImg },
+// invertOnDark: logo artwork is black, so it vanishes on the dark theme.
+// w/h: intrinsic size, so the browser reserves the right space up front.
+const clients: {
+  name: string;
+  img: string;
+  w: number;
+  h: number;
+  invertOnDark?: boolean;
+}[] = [
+  { name: "Swiggy", img: swiggyImg, w: 374, h: 112 },
+  { name: "Zomato", img: zomatoImg, w: 523, h: 112 },
+  { name: "Edelweiss", img: edelweissImg, w: 12726, h: 2518 },
+  { name: "Cypherock", img: cypherockImg, w: 112, h: 112, invertOnDark: true },
+  { name: "Mamaketo", img: mamaketoImg, w: 150, h: 95, invertOnDark: true },
+  { name: "O4H — Order for Health", img: o4hImg, w: 144, h: 112 },
 ];
 
 const wrap = (min: number, max: number, value: number) => {
@@ -97,6 +105,10 @@ const Clients = () => {
               key={`${client.name}-${index}`}
               src={client.img}
               alt={client.name}
+              width={client.w}
+              height={client.h}
+              loading="lazy"
+              decoding="async"
               className={`h-12 sm:h-14 w-auto max-w-[140px] object-contain opacity-60 ${
                 client.invertOnDark ? "invert-on-dark" : ""
               } hover:opacity-100 transition-opacity duration-300`}

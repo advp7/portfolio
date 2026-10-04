@@ -1,6 +1,6 @@
 // components
 import { CountUp } from "../components";
-import { OPEN_CASE_STUDY_EVENT } from "../components/CommandPalette";
+import { OPEN_CASE_STUDY_EVENT } from "../events";
 // framer-motion
 import { motion } from "framer-motion";
 // utils
