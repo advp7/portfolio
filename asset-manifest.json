@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/portfolio/static/css/main.4a75c046.css",
-    "main.js": "/portfolio/static/js/main.a5796ef6.js",
+    "main.js": "/portfolio/static/js/main.ec84b79b.js",
     "static/media/profile-pic.png": "/portfolio/static/media/profile-pic.1ebc3154657a94c352f6.png",
     "static/media/zomato.png": "/portfolio/static/media/zomato.c02b6872cf0429dbddbe.png",
     "static/media/o4h.png": "/portfolio/static/media/o4h.10baa0d4f95e8f7baf1f.png",
@@ -17,6 +17,6 @@
   },
   "entrypoints": [
     "static/css/main.4a75c046.css",
-    "static/js/main.a5796ef6.js"
+    "static/js/main.ec84b79b.js"
   ]
 }
