@@ -3,6 +3,8 @@ import { ASSISTANT_URL, TURNSTILE_SITE_KEY } from "./config";
 export interface ChatTurn {
   role: "user" | "assistant";
   text: string;
+  /** The Worker's signature on its own replies; unsigned ones are ignored */
+  sig?: string;
 }
 
 export type ActionName =
@@ -21,7 +23,7 @@ export interface AssistantAction {
 export type ServerEvent =
   | { type: "text"; text: string }
   | ({ type: "action" } & AssistantAction)
-  | { type: "done"; provider: string };
+  | { type: "done"; provider: string; sig?: string };
 
 export type ErrorCode = "session" | "rate" | "verify" | "network" | "server";
 
@@ -39,6 +41,7 @@ interface TurnstileApi {
     options: {
       sitekey: string;
       appearance?: "always" | "execute" | "interaction-only";
+      action?: string;
       size?: "normal" | "compact" | "flexible";
       theme?: "auto" | "light" | "dark";
       callback?: (token: string) => void;
@@ -166,6 +169,8 @@ export class AssistantSession {
       }
       this.widgetId = turnstile.render(container, {
         sitekey: TURNSTILE_SITE_KEY,
+        // The Worker only accepts tokens issued for this action
+        action: "ask-advaith",
         // Invisible unless Cloudflare actually needs the visitor to click
         appearance: "interaction-only",
         theme: "auto",

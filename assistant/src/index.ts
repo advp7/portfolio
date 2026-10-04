@@ -26,7 +26,8 @@ interface ChatMessage {
 type ClientEvent =
   | { type: "text"; text: string }
   | { type: "action"; name: string; args: Record<string, string> }
-  | { type: "done"; provider: Provider };
+  /** sig: this Worker's signature over the reply text (see signReply) */
+  | { type: "done"; provider: Provider; sig?: string };
 type Provider = "gemini" | "workers-ai" | "static";
 type Emit = (event: ClientEvent) => void;
 
@@ -39,6 +40,16 @@ const MAX_BODY_BYTES = 40_000;
 const MAX_OUTPUT_TOKENS = 450;
 const MAX_SUGGESTIONS = 2;
 const MAX_SUGGESTION_CHARS = 60;
+/** Must match the `action` the widget renders Turnstile with */
+const TURNSTILE_ACTION = "ask-advaith";
+
+// Block harmful output at Google's side too, not only via the prompt
+const SAFETY_SETTINGS = [
+  "HARM_CATEGORY_HARASSMENT",
+  "HARM_CATEGORY_HATE_SPEECH",
+  "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+  "HARM_CATEGORY_DANGEROUS_CONTENT",
+].map((category) => ({ category, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
 
 const SYSTEM_WITH_TOOLS = buildSystemPrompt(true);
 const SYSTEM_TEXT_ONLY = buildSystemPrompt(false);
@@ -107,11 +118,65 @@ const encoder = new TextEncoder();
 
 // ---------------------------------------------------------------- utilities
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "Cache-Control": "no-store",
+};
+
 const json = (body: unknown, status: number, headers: HeadersInit = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json", ...headers },
+    headers: { "content-type": "application/json", ...SECURITY_HEADERS, ...headers },
   });
+
+class BodyTooLarge extends Error {}
+
+/** Reads the body as text, refusing anything over `max` bytes without
+ *  buffering it all first (Content-Length can be absent or a lie) */
+const readBody = async (request: Request, max: number) => {
+  const declared = Number(request.headers.get("content-length") ?? "0");
+  if (declared > max) throw new BodyTooLarge();
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel().catch(() => {});
+      throw new BodyTooLarge();
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+};
+
+/** IPv6 visitors usually own a whole /64, so key limits on that prefix;
+ *  otherwise rotating addresses would dodge the rate limits */
+const clientKey = (ip: string) => {
+  if (!ip.includes(":")) return ip;
+  const [head, tail = ""] = ip.split("::");
+  const front = head ? head.split(":") : [];
+  const back = tail ? tail.split(":") : [];
+  const groups = [
+    ...front,
+    ...Array(Math.max(0, 8 - front.length - back.length)).fill("0"),
+    ...back,
+  ];
+  return `${groups
+    .slice(0, 4)
+    .map((g) => g.toLowerCase().padStart(4, "0"))
+    .join(":")}::/64`;
+};
 
 const corsHeaders = (origin: string): Record<string, string> => ({
   "Access-Control-Allow-Origin": origin,
@@ -156,10 +221,11 @@ async function* readSse(body: ReadableStream<Uint8Array>) {
 // Turnstile tokens are single-use, so a successful check is exchanged for a
 // short-lived signed session that covers the rest of the conversation.
 
-const sessionKey = async (env: Env) => {
+/** Separate HMAC keys per purpose, all derived from the Turnstile secret */
+const hmacKey = async (env: Env, purpose: "session" | "reply") => {
   const raw = await crypto.subtle.digest(
     "SHA-256",
-    encoder.encode(`ask-advaith-session:${env.TURNSTILE_SECRET_KEY}`)
+    encoder.encode(`ask-advaith-${purpose}:${env.TURNSTILE_SECRET_KEY}`)
   );
   return crypto.subtle.importKey(
     "raw",
@@ -170,35 +236,68 @@ const sessionKey = async (env: Env) => {
   );
 };
 
-const issueSession = async (env: Env) => {
-  const expiresAt = Date.now() + SESSION_TTL_MS;
-  const payload = b64url(encoder.encode(JSON.stringify({ exp: expiresAt })));
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    await sessionKey(env),
-    encoder.encode(payload)
-  );
-  return { session: `${payload}.${b64url(signature)}`, expiresAt };
-};
+const hmacSign = async (env: Env, purpose: "session" | "reply", text: string) =>
+  b64url(await crypto.subtle.sign("HMAC", await hmacKey(env, purpose), encoder.encode(text)));
 
-const verifySession = async (env: Env, token: unknown) => {
-  if (typeof token !== "string" || token.length > 512) return false;
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature) return false;
+const hmacVerify = async (
+  env: Env,
+  purpose: "session" | "reply",
+  text: string,
+  signature: unknown
+) => {
+  if (typeof signature !== "string" || !signature || signature.length > 100) return false;
   try {
-    const valid = await crypto.subtle.verify(
+    return await crypto.subtle.verify(
       "HMAC",
-      await sessionKey(env),
+      await hmacKey(env, purpose),
       fromB64url(signature),
-      encoder.encode(payload)
+      encoder.encode(text)
     );
-    if (!valid) return false;
-    const { exp } = JSON.parse(new TextDecoder().decode(fromB64url(payload)));
-    return typeof exp === "number" && exp > Date.now();
   } catch {
     return false;
   }
 };
+
+/** A one-way fingerprint of the visitor's network; the raw IP never goes
+ *  into the token */
+const networkTag = async (ipKey: string) =>
+  b64url(await crypto.subtle.digest("SHA-256", encoder.encode(`net:${ipKey}`))).slice(0, 22);
+
+/** Sessions only work from the network that passed Turnstile, so a leaked
+ *  token can't be replayed from elsewhere */
+const issueSession = async (env: Env, ipKey: string) => {
+  const expiresAt = Date.now() + SESSION_TTL_MS;
+  const payload = b64url(
+    encoder.encode(JSON.stringify({ exp: expiresAt, net: await networkTag(ipKey) }))
+  );
+  return {
+    session: `${payload}.${await hmacSign(env, "session", payload)}`,
+    expiresAt,
+  };
+};
+
+const verifySession = async (env: Env, token: unknown, ipKey: string) => {
+  if (typeof token !== "string" || token.length > 512) return false;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return false;
+  if (!(await hmacVerify(env, "session", payload, signature))) return false;
+  try {
+    const { exp, net } = JSON.parse(new TextDecoder().decode(fromB64url(payload)));
+    return (
+      typeof exp === "number" &&
+      exp > Date.now() &&
+      net === (await networkTag(ipKey))
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** Replies are signed so the history a client sends back can't contain
+ *  assistant turns we never said (a common jailbreak trick) */
+const signReply = (env: Env, text: string) => hmacSign(env, "reply", text);
+const replyIsOurs = (env: Env, text: string, sig: unknown) =>
+  hmacVerify(env, "reply", text, sig);
 
 const verifyTurnstile = async (
   env: Env,
@@ -217,33 +316,56 @@ const verifyTurnstile = async (
   const outcome = await res.json<{
     success: boolean;
     hostname?: string;
+    action?: string;
     "error-codes"?: string[];
   }>();
   if (!outcome.success) {
     console.warn("turnstile rejected", outcome["error-codes"]);
     return false;
   }
-  return !outcome.hostname || allowedHosts.includes(outcome.hostname);
+  // The token must come from this widget, on one of our own sites
+  return (
+    outcome.action === TURNSTILE_ACTION &&
+    Boolean(outcome.hostname) &&
+    allowedHosts.includes(outcome.hostname as string)
+  );
 };
 
 // -------------------------------------------------------------- validation
 
-const parseMessages = (value: unknown): ChatMessage[] | null => {
+const parseMessages = async (
+  env: Env,
+  value: unknown
+): Promise<ChatMessage[] | null> => {
   if (!Array.isArray(value) || value.length === 0) return null;
   if (value.length > MAX_MESSAGES) return null;
-  const messages: ChatMessage[] = [];
+  const incoming: (ChatMessage & { sig?: unknown })[] = [];
   for (const item of value) {
     if (!item || typeof item !== "object") return null;
-    const { role, text } = item as Record<string, unknown>;
+    const { role, text, sig } = item as Record<string, unknown>;
     if ((role !== "user" && role !== "assistant") || typeof text !== "string") {
       return null;
     }
     const limit = role === "user" ? MAX_USER_CHARS : MAX_ASSISTANT_CHARS;
     const trimmed = text.trim();
     if (!trimmed || trimmed.length > limit) return null;
-    messages.push({ role, text: trimmed });
+    incoming.push({ role, text: trimmed, sig });
   }
-  if (messages[messages.length - 1].role !== "user") return null;
+  if (incoming[incoming.length - 1].role !== "user") return null;
+
+  // Keep only assistant turns we actually wrote. A forged one is dropped
+  // along with the question it claims to answer.
+  const messages: ChatMessage[] = [];
+  for (const m of incoming) {
+    if (m.role === "user") {
+      messages.push({ role: "user", text: m.text });
+    } else if (await replyIsOurs(env, m.text, m.sig)) {
+      messages.push({ role: "assistant", text: m.text });
+    } else if (messages[messages.length - 1]?.role === "user") {
+      messages.pop();
+    }
+  }
+
   // Gemini needs the history to start with a user turn
   const recent = messages.slice(-HISTORY_WINDOW);
   while (recent.length && recent[0].role !== "user") recent.shift();
@@ -318,6 +440,7 @@ const streamGemini = async (
             parts: [{ text: m.text }],
           })),
           tools: [{ functionDeclarations: TOOLS }],
+          safetySettings: SAFETY_SETTINGS,
           generationConfig: {
             maxOutputTokens: MAX_OUTPUT_TOKENS,
             // A little warmer than factual-default so replies sound human
@@ -409,10 +532,16 @@ const handleSession = async (
     console.error("TURNSTILE_SECRET_KEY is not set");
     return json({ error: "not_configured" }, 503, cors);
   }
-  const { success } = await env.SESSION_LIMITER.limit({ key: ip });
+  const ipKey = clientKey(ip);
+  const { success } = await env.SESSION_LIMITER.limit({ key: ipKey });
   if (!success) return json({ error: "rate_limited" }, 429, cors);
 
-  const body = await request.json<{ token?: unknown }>().catch(() => null);
+  let body: { token?: unknown } | null = null;
+  try {
+    body = JSON.parse(await readBody(request, 8_000));
+  } catch (err) {
+    if (err instanceof BodyTooLarge) return json({ error: "too_large" }, 413, cors);
+  }
   const token = body?.token;
   if (typeof token !== "string" || !token || token.length > 4096) {
     return json({ error: "bad_request" }, 400, cors);
@@ -420,7 +549,7 @@ const handleSession = async (
   if (!(await verifyTurnstile(env, token, ip, allowedHosts))) {
     return json({ error: "verification_failed" }, 403, cors);
   }
-  return json(await issueSession(env), 200, cors);
+  return json(await issueSession(env, ipKey), 200, cors);
 };
 
 const handleChat = async (
@@ -430,32 +559,45 @@ const handleChat = async (
   ip: string,
   cors: Record<string, string>
 ) => {
-  const { success } = await env.CHAT_LIMITER.limit({ key: ip });
+  const ipKey = clientKey(ip);
+  const { success } = await env.CHAT_LIMITER.limit({ key: ipKey });
   if (!success) return json({ error: "rate_limited" }, 429, cors);
 
-  const raw = await request.text();
-  if (raw.length > MAX_BODY_BYTES) {
-    return json({ error: "too_large" }, 413, cors);
-  }
   let body: { session?: unknown; messages?: unknown };
   try {
-    body = JSON.parse(raw);
-  } catch {
+    body = JSON.parse(await readBody(request, MAX_BODY_BYTES));
+  } catch (err) {
+    return err instanceof BodyTooLarge
+      ? json({ error: "too_large" }, 413, cors)
+      : json({ error: "bad_request" }, 400, cors);
+  }
+  if (!body || typeof body !== "object") {
     return json({ error: "bad_request" }, 400, cors);
   }
-  if (!env.TURNSTILE_SECRET_KEY || !(await verifySession(env, body.session))) {
+  if (
+    !env.TURNSTILE_SECRET_KEY ||
+    !(await verifySession(env, body.session, ipKey))
+  ) {
     return json({ error: "session_expired" }, 401, cors);
   }
-  const messages = parseMessages(body.messages);
-  if (!messages) return json({ error: "bad_request" }, 400, cors);
+  const messages = await parseMessages(env, body.messages);
+  if (!messages || !messages.length) {
+    return json({ error: "bad_request" }, 400, cors);
+  }
 
   const { readable, writable } = new TransformStream<Uint8Array>();
   const writer = writable.getWriter();
-  const emit: Emit = (event) => {
+  const send = (event: ClientEvent) => {
     // The visitor may have closed the chat; nothing to do about it
     writer
       .write(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
       .catch(() => {});
+  };
+  // Everything we say is collected so the finished reply can be signed
+  let replyText = "";
+  const emit: Emit = (event) => {
+    if (event.type === "text") replyText += event.text;
+    send(event);
   };
 
   ctx.waitUntil(
@@ -473,7 +615,9 @@ const handleChat = async (
           }
         }
       } finally {
-        emit({ type: "done", provider });
+        const finalText = replyText.trim();
+        const sig = finalText ? await signReply(env, finalText) : undefined;
+        send({ type: "done", provider, ...(sig ? { sig } : {}) });
         await writer.close().catch(() => {});
       }
     })()
@@ -482,8 +626,9 @@ const handleChat = async (
   return new Response(readable, {
     headers: {
       ...cors,
+      ...SECURITY_HEADERS,
       "content-type": "text/event-stream; charset=utf-8",
-      "cache-control": "no-cache, no-transform",
+      "cache-control": "no-store, no-transform",
     },
   });
 };
@@ -503,6 +648,10 @@ export default {
     }
     if (request.method !== "POST") {
       return json({ error: "method_not_allowed" }, 405, cors);
+    }
+    // JSON only: also guarantees browsers send a CORS preflight first
+    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+      return json({ error: "unsupported_media_type" }, 415, cors);
     }
 
     const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";

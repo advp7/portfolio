@@ -51,6 +51,8 @@ interface Message {
   status: "streaming" | "done" | "error";
   /** Failed exchanges are kept on screen but not sent back to the model */
   excluded?: boolean;
+  /** Worker's signature for this reply, sent back with the history */
+  sig?: string;
 }
 
 const MAX_MESSAGES = 20;
@@ -148,6 +150,34 @@ const describeActions = (actions: AssistantAction[]) =>
 const INLINE =
   /(\*\*[^*]+\*\*|https?:\/\/[^\s)]*[^\s).,]|[\w.+-]+@[\w-]+\.[\w.-]*\w)/g;
 
+/**
+ * Replies come from a model that visitors can try to manipulate, so only
+ * links to Advaith's own pages become clickable; anything else is plain text.
+ */
+const TRUSTED_LINKS: { host: RegExp; path?: RegExp }[] = [
+  { host: /^advp7\.github\.io$/ },
+  { host: /^(www\.)?linkedin\.com$/, path: /^\/in\/advaith-praveen\/?$/i },
+  { host: /^github\.com$/, path: /^\/advp7(\/|$)/i },
+  { host: /^(www\.)?edelweissmf\.com$/ },
+  { host: /^(www\.)?engati\.ai$/ },
+];
+
+const isTrustedLink = (href: string) => {
+  try {
+    const url = new URL(href);
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      TRUSTED_LINKS.some(
+        ({ host, path }) => host.test(url.hostname) && (!path || path.test(url.pathname))
+      )
+    );
+  } catch {
+    return false;
+  }
+};
+
 const renderInline = (text: string, keyPrefix: string) =>
   text.split(INLINE).map((part, i): ReactNode => {
     const key = `${keyPrefix}-${i}`;
@@ -159,6 +189,7 @@ const renderInline = (text: string, keyPrefix: string) =>
       );
     }
     if (/^https?:\/\//.test(part)) {
+      if (!isTrustedLink(part)) return part;
       return (
         <a
           key={key}
@@ -172,6 +203,7 @@ const renderInline = (text: string, keyPrefix: string) =>
       );
     }
     if (/^[\w.+-]+@[\w-]+\.[\w.-]*\w$/.test(part)) {
+      if (part.toLowerCase() !== socials.email.toLowerCase()) return part;
       return (
         <a
           key={key}
@@ -497,6 +529,7 @@ const AskAdvaith = () => {
       .map((m) => ({
         role: m.role,
         text: m.text.trim() || describeActions(m.actions),
+        ...(m.sig ? { sig: m.sig } : {}),
       }))
       .filter((m) => m.text);
     history.push({ role: "user", text });
@@ -540,6 +573,9 @@ const AskAdvaith = () => {
               const action = { name: event.name, args: event.args };
               replyActions = [...replyActions, action];
               patch(replyId, (m) => ({ ...m, actions: [...m.actions, action] }));
+            } else if (event.type === "done" && event.sig) {
+              const sig = event.sig;
+              patch(replyId, (m) => ({ ...m, sig }));
             }
           },
           controller.signal

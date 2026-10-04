@@ -1,3 +1,5 @@
 # Copy to .dev.vars (gitignored) for local `npm run dev`, then fill in.
 GEMINI_API_KEY=
 TURNSTILE_SECRET_KEY=
+# Lets the local React dev server talk to `wrangler dev`
+ALLOWED_ORIGINS=https://advp7.github.io,http://localhost:3000
