@@ -385,47 +385,36 @@ const THINKING_STEPS = [
   "Pulling it together",
 ];
 
-/** Shown until the first words arrive */
+/**
+ * Shown until the first words arrive: one shimmering line whose phrase
+ * changes with the same blur-fade the reply's words use. The orb beside it
+ * carries the motion, so there's nothing else competing for attention.
+ */
 const ThinkingIndicator = () => {
   const [step, setStep] = useState(0);
   useEffect(() => {
     const id = window.setInterval(
       () => setStep((s) => Math.min(s + 1, THINKING_STEPS.length - 1)),
-      1600
+      1800
     );
     return () => window.clearInterval(id);
   }, []);
 
   return (
-    <div className="flex flex-col gap-2.5 py-0.5" role="status" aria-label="Thinking">
-      <div className="flex h-5 items-center gap-2">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={step}
-            initial={{ opacity: 0, y: 5, filter: "blur(3px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -5, filter: "blur(3px)" }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="ai-shimmer text-[13px] font-medium"
-          >
-            {THINKING_STEPS[step]}
-          </motion.span>
-        </AnimatePresence>
-        <span aria-hidden="true" className="flex items-center gap-1">
-          {[0, 1, 2].map((dot) => (
-            <span
-              key={dot}
-              className="ai-wave-dot h-1 w-1 rounded-full bg-accent"
-              style={{ animationDelay: `${dot * 0.14}s` }}
-            />
-          ))}
-        </span>
-      </div>
-      {/* Where the answer is about to land */}
-      <div aria-hidden="true" className="flex flex-col gap-1.5">
-        <span className="ai-skeleton h-2.5 w-[88%] rounded-full" />
-        <span className="ai-skeleton h-2.5 w-[60%] rounded-full [animation-delay:0.15s]" />
-      </div>
+    // Same size and line height as reply text, so nothing shifts on handoff
+    <div role="status" className="relative h-[1.625em] overflow-hidden">
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={step}
+          initial={{ opacity: 0, y: "40%", filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: "0%", filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: "-40%", filter: "blur(4px)" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="ai-shimmer absolute inset-x-0 top-0 whitespace-nowrap"
+        >
+          {THINKING_STEPS[step]}…
+        </motion.span>
+      </AnimatePresence>
     </div>
   );
 };
@@ -458,23 +447,32 @@ const AssistantReply = ({
 
   return (
     <>
-      {/* No exit wait here: the reveal must start the moment words arrive */}
-      {waiting && !visible ? (
-        verifying ? (
-          <p className="text-textMuted">
-            Running a quick human check. If a checkbox appears below, tick it
-            to continue.
-          </p>
-        ) : (
-          <ThinkingIndicator />
-        )
-      ) : visible ? (
-        <div
-          className={`break-words text-textSecondary ${revealing ? "ai-streaming" : ""}`}
-        >
-          <RichText text={visible} animate={animated} />
-        </div>
-      ) : null}
+      {/* popLayout: the loader blurs out on top while the first words blur
+          in underneath, with no wait, so the reveal starts immediately */}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {waiting && !visible ? (
+          <motion.div
+            key="waiting"
+            exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 0.35 } }}
+          >
+            {verifying ? (
+              <p className="text-textMuted">
+                Running a quick human check. If a checkbox appears below,
+                tick it to continue.
+              </p>
+            ) : (
+              <ThinkingIndicator />
+            )}
+          </motion.div>
+        ) : visible ? (
+          <motion.div
+            key="text"
+            className={`break-words text-textSecondary ${revealing ? "ai-streaming" : ""}`}
+          >
+            <RichText text={visible} animate={animated} />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
       {/* Cards and follow-ups arrive once the words have */}
       {!revealing && children && (
         <motion.div
