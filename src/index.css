@@ -512,8 +512,6 @@ html.custom-cursor [contenteditable="true"] {
   .orb::before,
   .orb::after,
   .mic-ring,
-  .ai-streaming .ai-rich > :last-child::after,
-  .ai-streaming .ai-rich > ul:last-child > li:last-child::after,
   .ai-word {
     animation: none;
   }
@@ -650,45 +648,18 @@ html.custom-cursor [contenteditable="true"] {
   }
 }
 
-/* Soft glowing cursor at the end of a reply while it reveals */
-.ai-streaming .ai-rich > p:last-child::after,
-.ai-streaming .ai-rich > ul:last-child > li:last-child::after {
-  content: "";
-  display: inline-block;
-  width: 0.42em;
-  height: 1em;
-  margin-left: 3px;
-  vertical-align: text-bottom;
-  border-radius: 3px;
-  background: linear-gradient(180deg, rgb(var(--accent)), rgb(var(--accent-alt)));
-  box-shadow: 0 0 10px rgb(var(--accent) / 0.55);
-  animation: ai-caret 1s ease-in-out infinite;
-}
-@keyframes ai-caret {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.25;
-  }
-}
-
-/* Each newly revealed word fades in from a soft blur. The fade is long
-   relative to the pace, so a few words are always mid-fade and the edge of
-   the reply reads as one soft gradient rather than words popping in. */
+/* Replies fade in a short phrase at a time: each phrase (its words mount
+   together) rises out of a soft blur. The fade outlasts the gap between
+   phrases, so several overlap and the text flows in as one motion. */
 .ai-word {
-  animation: ai-word-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: ai-word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes ai-word-in {
-  0% {
+  from {
     opacity: 0;
-    filter: blur(6px);
+    filter: blur(4px);
   }
-  35% {
-    opacity: 0.55;
-  }
-  100% {
+  to {
     opacity: 1;
     filter: blur(0);
   }

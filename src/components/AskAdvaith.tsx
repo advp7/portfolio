@@ -323,18 +323,34 @@ const HeaderButton = ({
 // ------------------------------------------------------- reply rendering
 
 /** Reading pace for revealed replies, in characters per second */
-const REVEAL_BASE_CPS = 42; // an unhurried reading pace at rest
-const REVEAL_CATCH_UP = 0.75; // gentle extra speed per character waiting
-const REVEAL_MAX_CPS = 160;
-/** A long word costs no more than this many characters, so words keep an
- *  even beat instead of pausing before something like "Google-partnered" */
+const REVEAL_BASE_CPS = 44; // an unhurried reading pace at rest
+const REVEAL_CATCH_UP = 0.7; // gentle extra speed per character waiting
+const REVEAL_MAX_CPS = 150;
+/** A long word costs no more than this many characters, so the beat stays
+ *  even instead of pausing before something like "Google-partnered" */
 const REVEAL_WORD_COST_CAP = 6;
+/** Text appears a short phrase at a time: up to this many words, ending
+ *  early at punctuation */
+const REVEAL_PHRASE_WORDS = 3;
+
+/** The next phrase from `pos`: its length in characters and reading cost */
+const nextPhrase = (full: string, pos: number) => {
+  let end = pos;
+  let cost = 0;
+  for (let words = 0; end < full.length && words < REVEAL_PHRASE_WORDS; words++) {
+    const word = full.slice(end).match(/^\s*\S+/)?.[0] ?? full.slice(end);
+    end += word.length;
+    cost += Math.min(word.trim().length, REVEAL_WORD_COST_CAP);
+    if (/[,.;:!?)]$/.test(word)) break;
+  }
+  return { length: end - pos, cost };
+};
 
 /**
- * Tokens arrive in uneven bursts; release them one word at a time on a
- * steady, frame-by-frame rhythm instead. Each frame earns a small "reading
- * budget"; a word appears once the budget covers it. Far behind, the pace
- * eases up gently rather than jumping.
+ * Tokens arrive in uneven bursts; release them a short phrase at a time on
+ * a steady, frame-by-frame rhythm instead. Each frame earns a small
+ * "reading budget"; a phrase appears once the budget covers it, and fades
+ * in as one unit. Far behind, the pace eases up gently rather than jumping.
  */
 const useSmoothedText = (text: string, enabled: boolean) => {
   const [shown, setShown] = useState(enabled ? 0 : text.length);
@@ -358,13 +374,12 @@ const useSmoothedText = (text: string, enabled: boolean) => {
         REVEAL_BASE_CPS + (full.length - pos) * REVEAL_CATCH_UP
       );
       budget += (speed * elapsed) / 1000;
-      // Whole words only (with the space before them), never half a word
+      // Whole phrases only, never half a word
       while (pos < full.length) {
-        const next = full.slice(pos).match(/^\s*\S+/)?.[0].length ?? full.length - pos;
-        const cost = Math.min(next, REVEAL_WORD_COST_CAP);
-        if (budget < cost) break;
-        budget -= cost;
-        pos += next;
+        const phrase = nextPhrase(full, pos);
+        if (budget < phrase.cost) break;
+        budget -= phrase.cost;
+        pos += phrase.length;
       }
       if (pos !== shownRef.current) {
         shownRef.current = pos;
@@ -465,10 +480,7 @@ const AssistantReply = ({
             )}
           </motion.div>
         ) : visible ? (
-          <motion.div
-            key="text"
-            className={`break-words text-textSecondary ${revealing ? "ai-streaming" : ""}`}
-          >
+          <motion.div key="text" className="break-words text-textSecondary">
             <RichText text={visible} animate={animated} />
           </motion.div>
         ) : null}
@@ -1006,7 +1018,9 @@ const AskAdvaith = () => {
             {/* Header. The orb only lives here once a conversation starts;
                 before that it's the big one in the welcome screen, and it
                 glides between the two (shared layoutId). */}
-            <div className="relative flex min-h-[70px] items-center gap-3 px-4 pt-4 pb-3">
+            {/* pr-2: the icon buttons carry 8px of their own padding, so
+                their glyphs land on the same 16px gutter as everything else */}
+            <div className="relative flex min-h-[70px] items-center gap-3 pl-4 pr-2 pt-4 pb-3">
               {messages.length > 0 && (
                 <motion.span layoutId={orbLayoutId} className="flex shrink-0">
                   <Orb size={38} state={orbState} />
@@ -1218,7 +1232,7 @@ const AskAdvaith = () => {
             <div ref={turnstileRef} className="flex justify-center px-4" />
 
             {/* Composer */}
-            <form onSubmit={onSubmit} className="relative px-3 pb-3 pt-1">
+            <form onSubmit={onSubmit} className="relative px-4 pb-4 pt-1">
               {voice.error && (
                 <p role="alert" className="mb-2 flex items-start justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-xs text-textSecondary">
                   {voice.error}
