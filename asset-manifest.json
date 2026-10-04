@@ -1,22 +1,25 @@
 {
   "files": {
-    "main.css": "/portfolio/static/css/main.09266d1d.css",
-    "main.js": "/portfolio/static/js/main.5f006f4c.js",
-    "static/media/profile-pic.png": "/portfolio/static/media/profile-pic.1ebc3154657a94c352f6.png",
-    "static/media/zomato.png": "/portfolio/static/media/zomato.c02b6872cf0429dbddbe.png",
-    "static/media/o4h.png": "/portfolio/static/media/o4h.10baa0d4f95e8f7baf1f.png",
-    "static/media/swiggy.png": "/portfolio/static/media/swiggy.ca4863b47c8e1eff5ad2.png",
+    "main.css": "/portfolio/static/css/main.e2fecad6.css",
+    "main.js": "/portfolio/static/js/main.a2082a81.js",
+    "static/js/426.172b3556.chunk.js": "/portfolio/static/js/426.172b3556.chunk.js",
+    "static/js/899.c6e62511.chunk.js": "/portfolio/static/js/899.c6e62511.chunk.js",
+    "static/js/231.55c6f2b0.chunk.js": "/portfolio/static/js/231.55c6f2b0.chunk.js",
     "static/media/mamaketo.svg": "/portfolio/static/media/mamaketo.25d5bfce67c5a856b67a5238b666b918.svg",
     "static/media/edelweiss_logo.svg": "/portfolio/static/media/edelweiss_logo.a735fcdbb78c1f1320eba6873afa74cc.svg",
+    "static/media/zomato.webp": "/portfolio/static/media/zomato.dca30c8f66b4b0ea90f8.webp",
+    "static/media/swiggy.webp": "/portfolio/static/media/swiggy.d90953b2394d1c140d1e.webp",
+    "static/media/o4h.webp": "/portfolio/static/media/o4h.c0853ccb0f57f14e8346.webp",
     "static/media/hero-illustration.svg": "/portfolio/static/media/hero-illustration.eac4698853d34b8fa24762b744ffb130.svg",
-    "static/media/github-icon.svg": "/portfolio/static/media/github-icon.ea6278c1a91ac0a4d7b9a472bbe338a4.svg",
     "index.html": "/portfolio/index.html",
+    "static/media/github-icon.svg": "/portfolio/static/media/github-icon.ea6278c1a91ac0a4d7b9a472bbe338a4.svg",
     "static/media/linkedin-icon.svg": "/portfolio/static/media/linkedin-icon.eb0d891c67531fa89130c37708581e63.svg",
+    "static/media/cypherock.webp": "/portfolio/static/media/cypherock.2253a044e44a9e3b9a39.webp",
     "static/media/twitter-icon.svg": "/portfolio/static/media/twitter-icon.b2065c8a44f682dfaf769d3ecad4963f.svg",
     "static/media/download-btn-icon.svg": "/portfolio/static/media/download-btn-icon.db00ff1fa6f1d172b12f9e1441c6d79c.svg"
   },
   "entrypoints": [
-    "static/css/main.09266d1d.css",
-    "static/js/main.5f006f4c.js"
+    "static/css/main.e2fecad6.css",
+    "static/js/main.a2082a81.js"
   ]
 }
