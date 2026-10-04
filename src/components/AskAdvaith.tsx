@@ -178,12 +178,26 @@ const isTrustedLink = (href: string) => {
   }
 };
 
-const renderInline = (text: string, keyPrefix: string) =>
+/** While a reply is revealing, each word mounts in its own span so it can
+ *  fade in; already-shown words keep their keys and don't animate again */
+const fadeWords = (text: string, keyPrefix: string): ReactNode[] =>
+  text.split(/(\s+)/).map((piece, i) =>
+    !piece || /^\s+$/.test(piece) ? (
+      piece
+    ) : (
+      <span key={`${keyPrefix}-w${i}`} className="ai-word">
+        {piece}
+      </span>
+    )
+  );
+
+const renderInline = (text: string, keyPrefix: string, animate = false) =>
   text.split(INLINE).map((part, i): ReactNode => {
     const key = `${keyPrefix}-${i}`;
+    const fade = animate ? " ai-word" : "";
     if (/^\*\*[^*]+\*\*$/.test(part)) {
       return (
-        <strong key={key} className="font-semibold text-textPrimary">
+        <strong key={key} className={`font-semibold text-textPrimary${fade}`}>
           {part.slice(2, -2)}
         </strong>
       );
@@ -196,7 +210,7 @@ const renderInline = (text: string, keyPrefix: string) =>
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent underline underline-offset-2 break-all"
+          className={`text-accent underline underline-offset-2 break-all${fade}`}
         >
           {part.replace(/^https?:\/\/(www\.)?/, "")}
         </a>
@@ -208,17 +222,24 @@ const renderInline = (text: string, keyPrefix: string) =>
         <a
           key={key}
           href={`mailto:${part}`}
-          className="text-accent underline underline-offset-2"
+          className={`text-accent underline underline-offset-2${fade}`}
         >
           {part}
         </a>
       );
     }
-    return part;
+    return animate ? <span key={key}>{fadeWords(part, key)}</span> : part;
   });
 
 /** Paragraphs, "- " bullets, **bold**, links. No HTML is ever injected. */
-const RichText = ({ text }: { text: string }) => {
+const RichText = ({ text: raw, animate = false }: { text: string; animate?: boolean }) => {
+  // Mid-reveal, a **bold** phrase may be cut before its closing marker;
+  // hide the dangling one instead of flashing raw asterisks
+  let text = raw;
+  if (animate && (raw.match(/\*\*/g)?.length ?? 0) % 2 === 1) {
+    const at = raw.lastIndexOf("**");
+    text = raw.slice(0, at) + raw.slice(at + 2);
+  }
   const blocks: ReactNode[] = [];
   let bullets: string[] = [];
   const flush = () => {
@@ -227,7 +248,7 @@ const RichText = ({ text }: { text: string }) => {
     blocks.push(
       <ul key={key} className="list-disc space-y-1 pl-5 marker:text-accent">
         {bullets.map((item, i) => (
-          <li key={i}>{renderInline(item, `${key}-${i}`)}</li>
+          <li key={i}>{renderInline(item, `${key}-${i}`, animate)}</li>
         ))}
       </ul>
     );
@@ -242,7 +263,7 @@ const RichText = ({ text }: { text: string }) => {
     flush();
     if (line.trim()) {
       const key = `p-${blocks.length}`;
-      blocks.push(<p key={key}>{renderInline(line, key)}</p>);
+      blocks.push(<p key={key}>{renderInline(line, key, animate)}</p>);
     }
   });
   flush();
@@ -298,6 +319,148 @@ const HeaderButton = ({
     <Icon>{children}</Icon>
   </button>
 );
+
+// ------------------------------------------------------- reply rendering
+
+/**
+ * Tokens arrive in uneven bursts; release them a word at a time at a steady
+ * pace instead, speeding up when far behind so it never lags much.
+ */
+const useSmoothedText = (text: string, enabled: boolean) => {
+  const [shown, setShown] = useState(enabled ? 0 : text.length);
+  const target = useRef(text);
+  target.current = text;
+  const behind = enabled && shown < text.length;
+
+  useEffect(() => {
+    if (!behind) return;
+    const id = window.setInterval(() => {
+      setShown((prev) => {
+        const full = target.current;
+        if (prev >= full.length) return prev;
+        const step = Math.max(3, Math.ceil((full.length - prev) / 10));
+        let next = Math.min(full.length, prev + step);
+        // Always finish the word we're in
+        next += full.slice(next).match(/^\S*/)?.[0].length ?? 0;
+        return next;
+      });
+    }, 35);
+    return () => window.clearInterval(id);
+  }, [behind]);
+
+  return enabled ? Math.min(shown, text.length) : text.length;
+};
+
+const THINKING_STEPS = [
+  "Thinking",
+  "Looking through Advaith's work",
+  "Pulling it together",
+];
+
+/** Shown until the first words arrive */
+const ThinkingIndicator = () => {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setStep((s) => Math.min(s + 1, THINKING_STEPS.length - 1)),
+      1600
+    );
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-2.5 py-0.5" role="status" aria-label="Thinking">
+      <div className="flex h-5 items-center gap-2">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={step}
+            initial={{ opacity: 0, y: 5, filter: "blur(3px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -5, filter: "blur(3px)" }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="ai-shimmer text-[13px] font-medium"
+          >
+            {THINKING_STEPS[step]}
+          </motion.span>
+        </AnimatePresence>
+        <span aria-hidden="true" className="flex items-center gap-1">
+          {[0, 1, 2].map((dot) => (
+            <span
+              key={dot}
+              className="ai-wave-dot h-1 w-1 rounded-full bg-accent"
+              style={{ animationDelay: `${dot * 0.14}s` }}
+            />
+          ))}
+        </span>
+      </div>
+      {/* Where the answer is about to land */}
+      <div aria-hidden="true" className="flex flex-col gap-1.5">
+        <span className="ai-skeleton h-2.5 w-[88%] rounded-full" />
+        <span className="ai-skeleton h-2.5 w-[60%] rounded-full [animation-delay:0.15s]" />
+      </div>
+    </div>
+  );
+};
+
+/**
+ * An assistant reply: thinking state, then a word-by-word fade-in reveal,
+ * then its cards and follow-ups. Only replies that stream in while mounted
+ * animate; finished ones (e.g. after reopening the panel) render still.
+ */
+const AssistantReply = ({
+  text,
+  streaming,
+  verifying,
+  waiting,
+  children,
+}: {
+  text: string;
+  streaming: boolean;
+  /** The human check is waiting on the visitor */
+  verifying: boolean;
+  /** Nothing has arrived yet */
+  waiting: boolean;
+  children?: ReactNode;
+}) => {
+  const shouldReduceMotion = useReducedMotion();
+  const [animated] = useState(streaming && !shouldReduceMotion);
+  const shown = useSmoothedText(text, animated);
+  const revealing = animated && (streaming || shown < text.length);
+  const visible = text.slice(0, shown);
+
+  return (
+    <>
+      {/* No exit wait here: the reveal must start the moment words arrive */}
+      {waiting && !visible ? (
+        verifying ? (
+          <p className="text-textMuted">
+            Running a quick human check. If a checkbox appears below, tick it
+            to continue.
+          </p>
+        ) : (
+          <ThinkingIndicator />
+        )
+      ) : visible ? (
+        <div
+          className={`break-words text-textSecondary ${revealing ? "ai-streaming" : ""}`}
+        >
+          <RichText text={visible} animate={animated} />
+        </div>
+      ) : null}
+      {/* Cards and follow-ups arrive once the words have */}
+      {!revealing && children && (
+        <motion.div
+          initial={animated ? { opacity: 0, y: 6 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col gap-2.5"
+        >
+          {children}
+        </motion.div>
+      )}
+    </>
+  );
+};
 
 // --------------------------------------------------------------- actions
 
@@ -478,11 +641,24 @@ const AskAdvaith = () => {
     wasOpen.current = open;
   }, [open, cancelVoice]);
 
-  // Keep the newest message in view while it streams
+  const hasMessages = messages.length > 0;
+  // Keep the newest message in view while it streams and reveals, unless
+  // the visitor has scrolled up to read something
   useEffect(() => {
     const log = logRef.current;
     if (log) log.scrollTop = log.scrollHeight;
   }, [messages]);
+  useEffect(() => {
+    const log = logRef.current;
+    const content = log?.firstElementChild;
+    if (!open || !log || !content || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 140;
+      if (nearBottom) log.scrollTop = log.scrollHeight;
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [open, hasMessages]);
 
   // Grow the textarea with its content, up to a few lines
   useEffect(() => {
@@ -821,40 +997,43 @@ const AskAdvaith = () => {
                   {status}
                 </p>
               </motion.div>
-              {canSpeak && (
+              {/* Tight group so the title keeps its room on small phones */}
+              <div className="flex shrink-0 items-center gap-0.5">
+                {canSpeak && (
+                  <HeaderButton
+                    label={speakReplies ? "Stop reading replies aloud" : "Read replies aloud"}
+                    pressed={speakReplies}
+                    onClick={toggleSpeech}
+                  >
+                    <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                    {speakReplies ? (
+                      <path d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14" />
+                    ) : (
+                      <path d="M22 9l-6 6M16 9l6 6" />
+                    )}
+                  </HeaderButton>
+                )}
                 <HeaderButton
-                  label={speakReplies ? "Stop reading replies aloud" : "Read replies aloud"}
-                  pressed={speakReplies}
-                  onClick={toggleSpeech}
+                  label={expanded ? "Shrink" : "Expand"}
+                  onClick={() => setExpanded((x) => !x)}
+                  className="hidden sm:flex"
                 >
-                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                  {speakReplies ? (
-                    <path d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14" />
+                  {expanded ? (
+                    <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
                   ) : (
-                    <path d="M22 9l-6 6M16 9l6 6" />
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                   )}
                 </HeaderButton>
-              )}
-              <HeaderButton
-                label={expanded ? "Shrink" : "Expand"}
-                onClick={() => setExpanded((x) => !x)}
-                className="hidden sm:flex"
-              >
-                {expanded ? (
-                  <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
-                ) : (
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                {messages.length > 0 && (
+                  <HeaderButton label="New chat" onClick={reset}>
+                    <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </HeaderButton>
                 )}
-              </HeaderButton>
-              {messages.length > 0 && (
-                <HeaderButton label="New chat" onClick={reset}>
-                  <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
+                <HeaderButton label="Close assistant" onClick={() => setOpen(false)}>
+                  <path d="M18 6L6 18M6 6l12 12" />
                 </HeaderButton>
-              )}
-              <HeaderButton label="Close assistant" onClick={() => setOpen(false)}>
-                <path d="M18 6L6 18M6 6l12 12" />
-              </HeaderButton>
+              </div>
             </div>
 
             {/* Conversation */}
@@ -931,29 +1110,20 @@ const AskAdvaith = () => {
                         />
                         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                           {message.status === "error" ? (
-                            <div className="rounded-xl border border-red-400/40 bg-red-400/10 px-3.5 py-2.5 text-textPrimary">
-                              {message.text}
-                            </div>
-                          ) : message.status === "streaming" && !message.text ? (
-                            verifying ? (
-                              <p className="text-textMuted">
-                                Running a quick human check. If a checkbox
-                                appears below, tick it to continue.
-                              </p>
-                            ) : (
-                              !message.actions.length && (
-                                <p className="ai-shimmer font-medium">Thinking</p>
-                              )
-                            )
-                          ) : (
-                            <div
-                              className={`break-words text-textSecondary ${
-                                message.status === "streaming" ? "ai-streaming" : ""
-                              }`}
+                            <motion.div
+                              initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="rounded-xl border border-red-400/40 bg-red-400/10 px-3.5 py-2.5 text-textPrimary"
                             >
-                              <RichText text={message.text} />
-                            </div>
-                          )}
+                              {message.text}
+                            </motion.div>
+                          ) : (
+                          <AssistantReply
+                            text={message.text}
+                            streaming={message.status === "streaming"}
+                            verifying={verifying}
+                            waiting={message.status === "streaming" && !message.text}
+                          >
                           {message.actions.some((a) => a.name !== "suggest_replies") && (
                             <div className="flex flex-wrap gap-2">
                               {message.actions
@@ -995,6 +1165,8 @@ const AskAdvaith = () => {
                                   ))}
                               </div>
                             )}
+                          </AssistantReply>
+                          )}
                         </div>
                       </motion.div>
                     )
