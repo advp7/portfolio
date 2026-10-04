@@ -66,11 +66,11 @@ const SUGGESTIONS: { icon: ReactNode; text: string }[] = [
   {
     icon: (
       <>
-        <path d="M5 21V4" />
-        <path d="M5 4h12l-2.5 4L17 12H5" />
+        <path d="M12 2l9 5-9 5-9-5 9-5z" />
+        <path d="M3 12l9 5 9-5M3 17l9 5 9-5" />
       </>
     ),
-    text: "What does Advaith do outside work?",
+    text: "Is Advaith frontend or full-stack?",
   },
   {
     icon: (
@@ -1082,7 +1082,7 @@ const AskAdvaith = () => {
                         Advaith
                       </h3>
                       <p className="mx-auto max-w-[300px] text-sm text-textMuted">
-                        His work, projects, skills, even life outside work. Type below
+                        Experience, projects and skills. Type below
                         {canUseVoice ? ", or tap the mic and just ask" : ""}.
                       </p>
                     </div>
