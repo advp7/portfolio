@@ -676,16 +676,21 @@ html.custom-cursor [contenteditable="true"] {
   }
 }
 
-/* Each newly revealed word fades in from a slight blur */
+/* Each newly revealed word fades in from a soft blur. The fade is long
+   relative to the pace, so a few words are always mid-fade and the edge of
+   the reply reads as one soft gradient rather than words popping in. */
 .ai-word {
-  animation: ai-word-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: ai-word-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes ai-word-in {
-  from {
+  0% {
     opacity: 0;
-    filter: blur(5px);
+    filter: blur(6px);
   }
-  to {
+  35% {
+    opacity: 0.55;
+  }
+  100% {
     opacity: 1;
     filter: blur(0);
   }

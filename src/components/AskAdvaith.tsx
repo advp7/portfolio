@@ -322,30 +322,58 @@ const HeaderButton = ({
 
 // ------------------------------------------------------- reply rendering
 
+/** Reading pace for revealed replies, in characters per second */
+const REVEAL_BASE_CPS = 42; // an unhurried reading pace at rest
+const REVEAL_CATCH_UP = 0.75; // gentle extra speed per character waiting
+const REVEAL_MAX_CPS = 160;
+/** A long word costs no more than this many characters, so words keep an
+ *  even beat instead of pausing before something like "Google-partnered" */
+const REVEAL_WORD_COST_CAP = 6;
+
 /**
- * Tokens arrive in uneven bursts; release them a word at a time at a steady
- * pace instead, speeding up when far behind so it never lags much.
+ * Tokens arrive in uneven bursts; release them one word at a time on a
+ * steady, frame-by-frame rhythm instead. Each frame earns a small "reading
+ * budget"; a word appears once the budget covers it. Far behind, the pace
+ * eases up gently rather than jumping.
  */
 const useSmoothedText = (text: string, enabled: boolean) => {
   const [shown, setShown] = useState(enabled ? 0 : text.length);
   const target = useRef(text);
   target.current = text;
+  const shownRef = useRef(shown);
   const behind = enabled && shown < text.length;
 
   useEffect(() => {
     if (!behind) return;
-    const id = window.setInterval(() => {
-      setShown((prev) => {
-        const full = target.current;
-        if (prev >= full.length) return prev;
-        const step = Math.max(3, Math.ceil((full.length - prev) / 10));
-        let next = Math.min(full.length, prev + step);
-        // Always finish the word we're in
-        next += full.slice(next).match(/^\S*/)?.[0].length ?? 0;
-        return next;
-      });
-    }, 35);
-    return () => window.clearInterval(id);
+    let raf = 0;
+    let last = performance.now();
+    let budget = 0;
+    const tick = (now: number) => {
+      const elapsed = Math.min(64, now - last); // don't lurch after a stall
+      last = now;
+      const full = target.current;
+      let pos = shownRef.current;
+      const speed = Math.min(
+        REVEAL_MAX_CPS,
+        REVEAL_BASE_CPS + (full.length - pos) * REVEAL_CATCH_UP
+      );
+      budget += (speed * elapsed) / 1000;
+      // Whole words only (with the space before them), never half a word
+      while (pos < full.length) {
+        const next = full.slice(pos).match(/^\s*\S+/)?.[0].length ?? full.length - pos;
+        const cost = Math.min(next, REVEAL_WORD_COST_CAP);
+        if (budget < cost) break;
+        budget -= cost;
+        pos += next;
+      }
+      if (pos !== shownRef.current) {
+        shownRef.current = pos;
+        setShown(pos);
+      }
+      if (pos < target.current.length) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [behind]);
 
   return enabled ? Math.min(shown, text.length) : text.length;
