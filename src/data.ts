@@ -51,6 +51,7 @@ export const caseStudies: CaseStudy[] = [
       "The React chat interface talks to a FastAPI service that orchestrates Gemini. The model can call tools to fetch what it needs to answer, and Redis caches responses so repeat questions come back fast.",
     outcome: [
       "Live on Edelweiss Mutual Fund's public website, handling hundreds of customer queries a week.",
+      "Won one of Engati's monthly awards for the assistant.",
     ],
   },
   {
@@ -80,6 +81,7 @@ export const caseStudies: CaseStudy[] = [
     outcome: [
       "Delivered the launch in about ten days.",
       "The shared architecture carried new RCS features and improvements after launch.",
+      "Recognised with an award at Engati for ownership of the launch.",
     ],
   },
 ];
@@ -131,6 +133,7 @@ export const experience: Experience[] = [
       "Owned the entire frontend of Ellie, a custom AI assistant live on Edelweiss's website and handling hundreds of customer queries a week — end to end from requirements gathering through design and implementation to review — and worked on its Python FastAPI backend: Gemini model calls, tool calling and Redis caching.",
       "Promoted to Senior UI Developer in 10 months and selected for the company's bar-raisers program; on a small, high-ownership team, I'm the go-to engineer for frontend architecture decisions, code reviews and unblocking teammates.",
       "Expanded beyond UI into full-stack delivery — shipping backend work in Java (Spring Boot) and Python (FastAPI), aligning API contracts, and contributing to end-to-end architecture decisions on a conversational-AI platform.",
+      "Recognition: an award for ownership of the RCS launch, a monthly company award for the Ellie assistant, and 3rd place in Engati's internal thinkathon.",
     ],
     stack: [
       "React",
