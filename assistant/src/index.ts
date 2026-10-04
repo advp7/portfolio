@@ -36,7 +36,9 @@ const HISTORY_WINDOW = 10; // most recent messages sent to the model
 const MAX_USER_CHARS = 500;
 const MAX_ASSISTANT_CHARS = 3000;
 const MAX_BODY_BYTES = 40_000;
-const MAX_OUTPUT_TOKENS = 600;
+const MAX_OUTPUT_TOKENS = 450;
+const MAX_SUGGESTIONS = 2;
+const MAX_SUGGESTION_CHARS = 60;
 
 const SYSTEM_WITH_TOOLS = buildSystemPrompt(true);
 const SYSTEM_TEXT_ONLY = buildSystemPrompt(false);
@@ -46,11 +48,13 @@ const OFF_TOPIC_REPLY =
 const STATIC_REPLY =
   "The assistant has used up its free AI quota for now, so I can't answer properly. You can still explore the case studies on this page, download the resume, or email Advaith directly.";
 
-// Client-side tools. Gemini decides when to call them; the browser runs them.
+// Client-side tools. Gemini decides when to call them; the browser renders
+// each one as something the visitor can tap. Nothing happens on its own.
 const TOOLS = [
   {
     name: "open_case_study",
-    description: "Open one of Advaith's case studies on the page.",
+    description:
+      "Show the visitor a preview card they can tap to open one of Advaith's case studies.",
     parameters: {
       type: "OBJECT",
       properties: {
@@ -65,7 +69,7 @@ const TOOLS = [
   },
   {
     name: "scroll_to_section",
-    description: "Scroll the page to a section.",
+    description: "Show the visitor a button that takes them to a section of the page.",
     parameters: {
       type: "OBJECT",
       properties: { section: { type: "STRING", enum: SECTION_IDS } },
@@ -79,6 +83,23 @@ const TOOLS = [
   {
     name: "copy_email",
     description: "Show the visitor a button to copy Advaith's email address.",
+  },
+  {
+    name: "suggest_replies",
+    description:
+      "Offer up to two short follow-up questions the visitor might want to ask next, shown as tappable chips.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        questions: {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description:
+            "1-2 follow-ups written as the visitor would ask them, about Advaith, each under 8 words.",
+        },
+      },
+      required: ["questions"],
+    },
   },
 ];
 
@@ -251,6 +272,17 @@ const toAction = (call: {
     case "download_resume":
     case "copy_email":
       return { type: "action", name: call.name, args: {} };
+    case "suggest_replies": {
+      // Model-written text shown as buttons: keep it short and plain
+      const questions = (Array.isArray(args.questions) ? args.questions : [])
+        .filter((q): q is string => typeof q === "string")
+        .map((q) => q.replace(/[\r\n]+/g, " ").trim())
+        .filter((q) => q && q.length <= MAX_SUGGESTION_CHARS)
+        .slice(0, MAX_SUGGESTIONS);
+      return questions.length
+        ? { type: "action", name: call.name, args: { questions: questions.join("\n") } }
+        : null;
+    }
     default:
       return null;
   }
@@ -288,7 +320,8 @@ const streamGemini = async (
           tools: [{ functionDeclarations: TOOLS }],
           generationConfig: {
             maxOutputTokens: MAX_OUTPUT_TOKENS,
-            temperature: 0.4,
+            // A little warmer than factual-default so replies sound human
+            temperature: 0.6,
             // Short factual answers need as little thinking as possible
             thinkingConfig: { thinkingLevel: env.GEMINI_THINKING_LEVEL },
           },

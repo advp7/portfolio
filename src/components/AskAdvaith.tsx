@@ -128,11 +128,11 @@ const describeActions = (actions: AssistantAction[]) =>
     .map((action) => {
       switch (action.name) {
         case "open_case_study":
-          return `Opened the case study "${
+          return `Here's the case study "${
             caseStudies.find((s) => s.id === action.args.id)?.title ?? ""
           }".`;
         case "scroll_to_section":
-          return `Took you to ${SECTION_LABELS[action.args.section]}.`;
+          return `Here's a link to ${SECTION_LABELS[action.args.section]}.`;
         case "download_resume":
           return "Here's Advaith's resume.";
         case "copy_email":
@@ -272,7 +272,14 @@ const HeaderButton = ({
 const chip =
   "inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20 transition-colors";
 
-const ActionView = ({ action }: { action: AssistantAction }) => {
+const ActionView = ({
+  action,
+  onNavigate,
+}: {
+  action: AssistantAction;
+  /** Called before taking the visitor somewhere else on the page */
+  onNavigate: () => void;
+}) => {
   const [copied, setCopied] = useState(false);
 
   switch (action.name) {
@@ -312,7 +319,10 @@ const ActionView = ({ action }: { action: AssistantAction }) => {
         <button
           type="button"
           className={chip}
-          onClick={() => scrollToSection(action.args.section)}
+          onClick={() => {
+            onNavigate();
+            scrollToSection(action.args.section);
+          }}
         >
           Go to {SECTION_LABELS[action.args.section] ?? "section"} ↓
         </button>
@@ -465,15 +475,10 @@ const AskAdvaith = () => {
   const patch = (id: number, update: (m: Message) => Message) =>
     setMessages((prev) => prev.map((m) => (m.id === id ? update(m) : m)));
 
-  const runAction = useCallback((action: AssistantAction) => {
-    // These two act on the page; the others wait for the visitor's click
-    if (action.name === "open_case_study") {
-      if (isSmallScreen()) setOpen(false);
-      window.setTimeout(() => openCaseStudy(action.args.id));
-    } else if (action.name === "scroll_to_section") {
-      if (isSmallScreen()) setOpen(false);
-      scrollToSection(action.args.section);
-    }
+  // On phones the panel covers the page, so get out of the way before
+  // scrolling to a section
+  const leavePanelOnPhones = useCallback(() => {
+    if (isSmallScreen()) setOpen(false);
   }, []);
 
   const speakReply = (text: string) =>
@@ -535,7 +540,6 @@ const AskAdvaith = () => {
               const action = { name: event.name, args: event.args };
               replyActions = [...replyActions, action];
               patch(replyId, (m) => ({ ...m, actions: [...m.actions, action] }));
-              runAction(action);
             }
           },
           controller.signal
@@ -771,7 +775,7 @@ const AskAdvaith = () => {
                 </motion.span>
               )}
               <motion.div layout={shouldReduceMotion ? false : "position"} className="min-w-0 flex-1">
-                <p className="font-display font-semibold leading-tight text-textPrimary">
+                <p className="truncate whitespace-nowrap font-display font-semibold leading-tight text-textPrimary">
                   Ask Advaith
                 </p>
                 <p className="flex items-center gap-1.5 truncate text-xs text-textMuted" aria-live="polite">
@@ -914,13 +918,47 @@ const AskAdvaith = () => {
                               <RichText text={message.text} />
                             </div>
                           )}
-                          {message.actions.length > 0 && (
+                          {message.actions.some((a) => a.name !== "suggest_replies") && (
                             <div className="flex flex-wrap gap-2">
-                              {message.actions.map((action, i) => (
-                                <ActionView key={i} action={action} />
-                              ))}
+                              {message.actions
+                                .filter((a) => a.name !== "suggest_replies")
+                                .map((action, i) => (
+                                  <ActionView
+                                    key={i}
+                                    action={action}
+                                    onNavigate={leavePanelOnPhones}
+                                  />
+                                ))}
                             </div>
                           )}
+                          {/* Follow-ups the model suggested, only under the
+                              latest finished reply */}
+                          {message.id === latest?.id &&
+                            message.status === "done" &&
+                            !busy &&
+                            !atLimit && (
+                              <div className="flex flex-wrap gap-2 pt-1">
+                                {message.actions
+                                  .filter((a) => a.name === "suggest_replies")
+                                  .flatMap((a) => (a.args.questions ?? "").split("\n"))
+                                  .filter(Boolean)
+                                  .map((question) => (
+                                    <motion.button
+                                      key={question}
+                                      type="button"
+                                      onClick={() => send(question)}
+                                      initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      className="inline-flex items-center gap-1.5 rounded-full border border-stroke bg-surface
+                                      px-3 py-1.5 text-left text-xs text-textSecondary
+                                      hover:border-accent/50 hover:text-textPrimary transition-colors"
+                                    >
+                                      <span aria-hidden="true" className="text-accent">↳</span>
+                                      {question}
+                                    </motion.button>
+                                  ))}
+                              </div>
+                            )}
                         </div>
                       </motion.div>
                     )

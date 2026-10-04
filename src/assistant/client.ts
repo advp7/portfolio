@@ -9,7 +9,9 @@ export type ActionName =
   | "open_case_study"
   | "scroll_to_section"
   | "download_resume"
-  | "copy_email";
+  | "copy_email"
+  /** args.questions: follow-ups separated by newlines */
+  | "suggest_replies";
 
 export interface AssistantAction {
   name: ActionName;
