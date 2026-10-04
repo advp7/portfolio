@@ -196,7 +196,7 @@ story.append(job(
 story += heading("Awards &amp; Recognition")
 story.append(bullets([
     "<b>Ownership award, Engati</b> — for driving the RCS channel launch to go-live.",
-    "<b>Monthly company award, Engati</b> — for Ellie, the AI assistant built for Edelweiss Mutual Fund.",
+    "<b>Two monthly company awards, Engati</b> — for Ellie, and for moving a Google Sheets integration to Drive Picker.",
     "<b>3rd place, Engati internal thinkathon.</b>",
 ]))
 

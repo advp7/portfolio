@@ -56,6 +56,7 @@ export const profile: Profile = {
     "Received an award at Engati for ownership of the RCS launch.",
     "Won one of Engati's monthly awards for Ellie, the AI assistant he built for Edelweiss Mutual Fund.",
     "Placed 3rd in Engati's internal thinkathon.",
+    "Won an earlier monthly award at Engati for moving the platform's Google Sheets integration from native Google Drive access to access through Google's Drive Picker, a change with a lot of unknowns that he worked through. (A smaller win than the RCS and Ellie work; mention it when asked about awards or problem-solving, not as a headline.)",
     "Attended the RCS event in Hyderabad as part of the RCS launch, which he counts as a meaningful milestone and a great learning experience.",
   ],
 
