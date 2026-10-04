@@ -95,9 +95,6 @@ const IntroOverlay: FC<{
   const [phase, setPhase] = useState<Phase>("words");
   const [wordIndex, setWordIndex] = useState(0);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [frame, setFrame] = useState<{ width: number; align: string } | null>(
-    null
-  );
   const overlayLineRef = useRef<HTMLSpanElement>(null);
   const finishedRef = useRef(false);
   const prevOverflowRef = useRef("");
@@ -186,17 +183,9 @@ const IntroOverlay: FC<{
       if (i > 0) later(() => setWordIndex(i), i * WORD_MS);
     });
     const finalAt = GREETINGS.length * WORD_MS;
-    later(() => {
-      // Match the real headline's width and alignment so lines wrap identically
-      const h1 = greetingRef.current?.closest("h1");
-      if (h1) {
-        setFrame({
-          width: h1.getBoundingClientRect().width,
-          align: getComputedStyle(h1).textAlign,
-        });
-      }
-      setPhase("final");
-    }, finalAt);
+    // The name is centred exactly like the greetings; the flight is measured
+    // from wherever it actually sits, so it still lands precisely
+    later(() => setPhase("final"), finalAt);
 
     later(() => {
       const from = overlayLineRef.current?.getBoundingClientRect();
@@ -256,12 +245,7 @@ const IntroOverlay: FC<{
                 ? { duration: FLY_MS / 1000, ease: FLY_EASE }
                 : WORD_FADE
             }
-            style={
-              frame
-                ? { width: frame.width, textAlign: frame.align as "left" }
-                : undefined
-            }
-            className={`${HEADLINE_CLASSES} [grid-area:1/1]`}
+            className={`${HEADLINE_CLASSES} text-center [grid-area:1/1]`}
           >
             {/* The greetings already said hello, so the name lands on its
                 own; the hero adds its "Hi," once it's there */}
@@ -272,15 +256,6 @@ const IntroOverlay: FC<{
         )}
         </AnimatePresence>
       </div>
-
-      <button
-        type="button"
-        onClick={skip}
-        className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-6 font-mono text-xs
-        tracking-[0.2em] uppercase text-textMuted hover:text-textPrimary transition-colors"
-      >
-        Skip intro
-      </button>
     </motion.div>
   );
 };
