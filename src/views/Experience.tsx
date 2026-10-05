@@ -10,6 +10,35 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { fadeIn } from "../utils/variants";
 import { transition } from "../utils/transition";
 
+/** Company initial in a gradient ring; pulses for the current role */
+const Monogram = ({
+  letter,
+  current,
+  className,
+}: {
+  letter: string;
+  current: boolean;
+  className: string;
+}) => (
+  <div
+    aria-hidden="true"
+    className={`rounded-full p-[2px] bg-gradient-to-br from-accent to-accentAlt
+    shadow-[0_0_20px_rgba(56,189,248,0.35)] ${className}`}
+  >
+    {/* bg-night must live on its own element: .gradient-text sets the
+        `background` shorthand, which would otherwise wipe the fill */}
+    <div className="h-full w-full rounded-full bg-night flex items-center justify-center">
+      <span className="font-display font-bold text-lg gradient-text">{letter}</span>
+    </div>
+    {current && (
+      <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accentAlt opacity-70" />
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-accentAlt border-2 border-night" />
+      </span>
+    )}
+  </div>
+);
+
 const Experience = () => {
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -41,14 +70,15 @@ const Experience = () => {
           className="relative max-w-[920px] w-full mx-auto xl:mx-0"
         >
           {/* Timeline rail: static track + scroll-linked gradient fill */}
+          {/* Phones skip the rail so cards get the full width for reading */}
           <div
             aria-hidden="true"
-            className="absolute left-[21px] top-3 bottom-3 w-px bg-stroke"
+            className="absolute left-[21px] top-3 bottom-3 hidden w-px bg-stroke sm:block"
           />
           <motion.div
             aria-hidden="true"
             style={{ scaleY: railScale }}
-            className="absolute left-[21px] top-3 bottom-3 w-px origin-top
+            className="absolute left-[21px] top-3 bottom-3 hidden w-px origin-top sm:block
             bg-gradient-to-b from-accent via-accentAlt to-accent
             shadow-[0_0_12px_rgba(56,189,248,0.5)]"
           />
@@ -65,38 +95,31 @@ const Experience = () => {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, margin: "-60px" }}
-                  className="relative pl-16"
+                  className="relative sm:pl-16"
                 >
-                  {/* Company monogram node */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute left-0 top-2 h-11 w-11 rounded-full p-[2px]
-                    bg-gradient-to-br from-accent to-accentAlt
-                    shadow-[0_0_20px_rgba(56,189,248,0.35)]"
-                  >
-                    {/* bg-night must live on its own element: .gradient-text sets the
-                        `background` shorthand, which would otherwise wipe the fill */}
-                    <div className="h-full w-full rounded-full bg-night flex items-center justify-center">
-                      <span className="font-display font-bold text-lg gradient-text">
-                        {job.company.charAt(0)}
-                      </span>
-                    </div>
-                    {isCurrent && (
-                      <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accentAlt opacity-70" />
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-accentAlt border-2 border-night" />
-                      </span>
-                    )}
-                  </div>
+                  {/* Company monogram node on the rail (tablet and up) */}
+                  <Monogram
+                    letter={job.company.charAt(0)}
+                    current={isCurrent}
+                    className="absolute left-0 top-2 hidden h-11 w-11 sm:block"
+                  />
 
                   <SpotlightCard className="bg-surface border border-stroke rounded-2xl p-5 sm:p-6 hover:border-strokeStrong transition-colors duration-300">
-                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                      <h3 className="font-display text-xl sm:text-2xl font-semibold text-textPrimary">
-                        {job.role}
-                      </h3>
-                      <p className="font-mono text-xs sm:text-sm text-accent whitespace-nowrap">
-                        {job.period}
-                      </p>
+                    <div className="flex items-start gap-3">
+                      {/* On phones the monogram sits in the card header */}
+                      <Monogram
+                        letter={job.company.charAt(0)}
+                        current={isCurrent}
+                        className="relative mt-0.5 h-9 w-9 shrink-0 sm:hidden"
+                      />
+                      <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                        <h3 className="font-display text-xl sm:text-2xl font-semibold text-textPrimary">
+                          {job.role}
+                        </h3>
+                        <p className="font-mono text-xs sm:text-sm text-accent whitespace-nowrap">
+                          {job.period}
+                        </p>
+                      </div>
                     </div>
 
                     <p className="mt-1 text-textSecondary font-medium">
@@ -124,7 +147,7 @@ const Experience = () => {
                       {job.stack.map((tech) => (
                         <li
                           key={tech}
-                          className="font-mono text-[11px] text-textSecondary bg-accentDim/50 border border-stroke
+                          className="font-mono text-xs text-textSecondary bg-accentDim/50 border border-stroke
                           rounded-full py-1 px-2.5"
                         >
                           {tech}

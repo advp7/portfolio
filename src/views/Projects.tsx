@@ -74,7 +74,7 @@ const StackChips: FC<{ stack: string[] }> = ({ stack }) => (
     {stack.map((tech) => (
       <li
         key={tech}
-        className="font-mono text-[11px] text-textSecondary bg-accentDim/50 border border-stroke rounded-full py-1 px-2.5"
+        className="font-mono text-xs text-textSecondary bg-accentDim/50 border border-stroke rounded-full py-1 px-2.5"
       >
         {tech}
       </li>
@@ -159,7 +159,7 @@ const FeaturedProject: FC<{
               <ExternalIcon />
             </a>
           ) : (
-            <span className="flex items-center gap-1.5 font-mono text-[11px] text-textMuted">
+            <span className="flex items-center gap-1.5 font-mono text-xs text-textMuted">
               <LockIcon />
               {study.access}
             </span>
@@ -168,7 +168,9 @@ const FeaturedProject: FC<{
       </div>
 
       <div
-        className={`overflow-x-auto rounded-xl border border-stroke bg-night/60 p-3 sm:p-5 ${
+        // Phones skip the diagram here (it can't shrink legibly); the case
+        // study, one tap away, still has it
+        className={`hidden sm:block overflow-x-auto rounded-xl border border-stroke bg-night/60 p-3 sm:p-5 ${
           flip ? "xl:order-1" : ""
         }`}
       >
@@ -182,7 +184,7 @@ const EarlierWorkCard: FC<{ work: EarlierWork }> = ({ work }) => {
   const inner = (
     <div className="flex flex-col gap-3 h-full p-6">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <span className="whitespace-nowrap font-mono text-[11px] text-textMuted">{work.org}</span>
+        <span className="whitespace-nowrap font-mono text-xs text-textMuted">{work.org}</span>
         {work.link ? (
           <svg
             aria-hidden="true"
@@ -199,7 +201,7 @@ const EarlierWorkCard: FC<{ work: EarlierWork }> = ({ work }) => {
           </svg>
         ) : (
           work.access && (
-            <span className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] text-textMuted">
+            <span className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[11px] text-textMuted">
               <LockIcon />
               {work.access}
             </span>
@@ -269,10 +271,10 @@ const AskAdvaithCard = () => (
       {/* The story */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="font-mono text-[11px] text-textMuted">
+          <span className="font-mono text-xs text-textMuted">
             Side project · 2026
           </span>
-          <span className="flex items-center gap-1.5 font-mono text-[10px] text-accent">
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-accent">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-60 animate-ping motion-reduce:animate-none" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
@@ -293,7 +295,7 @@ const AskAdvaithCard = () => (
         <ol
           aria-label="How a question travels"
           className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1.5 sm:gap-y-2
-          font-mono text-[11px]"
+          font-mono text-xs"
         >
           {PIPELINE.map((step, i) => (
             <li key={step} className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-1.5">
@@ -327,7 +329,7 @@ const AskAdvaithCard = () => (
           study for you.
         </p>
         <div className="flex flex-col gap-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-textMuted">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-textMuted">
             Try asking
           </p>
           <div className="flex flex-wrap gap-2">

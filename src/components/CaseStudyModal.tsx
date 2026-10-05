@@ -203,7 +203,7 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
               <Section title="The problem">
                 {study.background && (
                   <div className="rounded-xl border border-stroke bg-surface px-4 py-3.5">
-                    <p className="font-mono text-[11px] tracking-[0.15em] uppercase text-textMuted">
+                    <p className="font-mono text-xs tracking-[0.15em] uppercase text-textMuted">
                       {study.background.label}
                     </p>
                     <p className="mt-1.5 text-sm text-textSecondary leading-relaxed">
@@ -247,7 +247,7 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
                   {study.stack.map((tech) => (
                     <li
                       key={tech}
-                      className="font-mono text-[11px] text-textSecondary bg-accentDim/50 border border-stroke rounded-full py-1 px-2.5"
+                      className="font-mono text-xs text-textSecondary bg-accentDim/50 border border-stroke rounded-full py-1 px-2.5"
                     >
                       {tech}
                     </li>
@@ -267,7 +267,7 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
                     <span aria-hidden="true">↗</span>
                   </a>
                 ) : (
-                  <span className="font-mono text-[11px] text-textMuted whitespace-nowrap">
+                  <span className="font-mono text-xs text-textMuted whitespace-nowrap">
                     {study.access}
                   </span>
                 )}

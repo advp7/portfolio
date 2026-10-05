@@ -41,7 +41,7 @@ const Window: FC<{ children: ReactNode; label: string; grow?: boolean }> = ({
       <span className="h-2 w-2 rounded-full bg-textMuted/40" />
       <span className="h-2 w-2 rounded-full bg-textMuted/40" />
       <span className="h-2 w-2 rounded-full bg-textMuted/40" />
-      <span className="ml-2 font-mono text-[10px] text-textMuted">{label}</span>
+      <span className="ml-2 font-mono text-[11px] text-textMuted">{label}</span>
     </div>
     <div className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed">
       {children}
@@ -118,7 +118,7 @@ const TerminalVisual = () => (
 const SWATCHES = [
   { token: "--accent", className: "bg-accent" },
   { token: "--accent-alt", className: "bg-accentAlt" },
-  { token: "--text-primary", className: "bg-textPrimary" },
+  { token: "--text", className: "bg-textPrimary" },
   { token: "--night", className: "bg-night" },
 ];
 
@@ -126,13 +126,13 @@ const SWATCHES = [
 // so they change with the theme toggle
 const DesignVisual = () => (
   <Window label="tokens.css">
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 xs:grid-cols-4 gap-3">
       {SWATCHES.map((swatch) => (
         <div key={swatch.token} className="flex flex-col gap-1.5">
           <span
             className={`h-10 rounded-lg border border-stroke ${swatch.className}`}
           />
-          <span className="truncate text-[10px] text-textMuted">
+          <span className="whitespace-nowrap text-[11px] text-textMuted">
             {swatch.token}
           </span>
         </div>

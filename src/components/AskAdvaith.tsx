@@ -129,6 +129,14 @@ const warmUp = () => {
 
 const isSmallScreen = () => window.matchMedia("(max-width: 639px)").matches;
 
+/** Focusing the input on a phone pops the keyboard up over the chat, so
+ *  only do it for mouse/trackpad users */
+const focusInputIfDesktop = (el: HTMLTextAreaElement | null) => {
+  if (el && window.matchMedia("(pointer: fine)").matches) {
+    el.focus({ preventScroll: true });
+  }
+};
+
 const scrollToSection = (id: string) => {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document
@@ -586,7 +594,7 @@ const ActionView = ({
           hover:border-accent/50 hover:bg-surfaceHover transition-colors"
         >
           <span className="min-w-0 flex-1">
-            <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-accent">
+            <span className="block font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
               Case study
             </span>
             <span className="block truncate text-sm font-semibold text-textPrimary">
@@ -684,10 +692,12 @@ const AskAdvaith = () => {
 
   const voice = useVoiceInput({
     onInterim: setCaption,
+    // What was said goes into the box to check or edit, then one tap sends
     onFinal: (text) => {
       setCaption("");
+      if (!text) return;
       if (!userMuted.current && canSpeak) setSpeakReplies(true);
-      if (text) sendRef.current(text);
+      setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text));
     },
     onLevel: setLevel,
   });
@@ -727,7 +737,7 @@ const AskAdvaith = () => {
   const { cancel: cancelVoice } = voice;
   useEffect(() => {
     if (open) {
-      inputRef.current?.focus();
+      focusInputIfDesktop(inputRef.current);
     } else {
       cancelVoice();
       stopSpeaking();
@@ -879,7 +889,7 @@ const AskAdvaith = () => {
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
       setBusy(false);
-      inputRef.current?.focus({ preventScroll: true });
+      focusInputIfDesktop(inputRef.current);
     }
   };
 
@@ -922,7 +932,7 @@ const AskAdvaith = () => {
     setSpeaking(false);
     setMessages([]);
     setInput("");
-    inputRef.current?.focus();
+    focusInputIfDesktop(inputRef.current);
   };
 
   const toggleSpeech = () => {
@@ -1400,7 +1410,7 @@ const AskAdvaith = () => {
                   )
                 )}
               </div>
-              <p className="mt-2 text-center text-[11px] leading-snug text-textMuted">
+              <p className="mt-2 text-center text-xs leading-snug text-textMuted">
                 AI answers, grounded in Advaith's portfolio
               </p>
             </form>

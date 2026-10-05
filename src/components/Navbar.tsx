@@ -52,7 +52,7 @@ const Navbar = () => {
       >
         <a
           href="#home"
-          className="font-display font-bold text-lg text-textPrimary"
+          className="py-1.5 font-display font-bold text-lg text-textPrimary"
           onClick={() => setMenuOpen(false)}
         >
           advaith<span className="gradient-text">.dev</span>

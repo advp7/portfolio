@@ -314,7 +314,7 @@ const CommandPalette = () => {
                       {showGroup && (
                         <p
                           role="presentation"
-                          className="px-3 pb-1 pt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-textMuted"
+                          className="px-3 pb-1 pt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-textMuted"
                         >
                           {command.group}
                         </p>
@@ -336,7 +336,7 @@ const CommandPalette = () => {
                         {selected && (
                           <span
                             aria-hidden="true"
-                            className="font-mono text-[11px] text-accent"
+                            className="font-mono text-xs text-accent"
                           >
                             ↵
                           </span>

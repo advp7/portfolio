@@ -51,7 +51,7 @@ const Stats = () => {
                 className="group relative flex flex-col items-center justify-start gap-2
                 bg-night px-4 pt-8 pb-10 text-center hover:bg-surface transition-colors duration-300"
               >
-                <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.18em] text-textMuted">
+                <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.18em] text-textMuted">
                   {stat.tag}
                 </span>
                 <span
@@ -82,7 +82,7 @@ const Stats = () => {
                 {/* Visible on hover/focus with a mouse; always on touch screens */}
                 <span
                   aria-hidden="true"
-                  className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium
+                  className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] sm:text-xs font-medium
                   text-accent opacity-0 translate-y-1 transition-all duration-300
                   group-hover:opacity-100 group-hover:translate-y-0
                   group-focus-visible:opacity-100 group-focus-visible:translate-y-0

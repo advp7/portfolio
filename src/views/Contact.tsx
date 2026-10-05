@@ -78,7 +78,7 @@ const Contact = () => {
           <Reveal>
             <a
               href={`mailto:${socials.email}`}
-              className="block text-center xl:text-left font-mono text-accent hover:underline underline-offset-4"
+              className="block py-1.5 text-center xl:text-left font-mono text-accent hover:underline underline-offset-4"
             >
               {socials.email}
             </a>

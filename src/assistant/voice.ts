@@ -95,22 +95,22 @@ export const useVoiceInput = (options: VoiceInputOptions) => {
     }
   }, []);
 
-  const start = useCallback(async () => {
+  /**
+   * Must be called directly from the tap handler: iOS only lets speech
+   * recognition start inside the user gesture, so nothing is awaited first.
+   */
+  const start = useCallback(() => {
     const Ctor = recognitionCtor();
     if (!Ctor || recognitionRef.current) return;
     setError(null);
 
-    // Ask for the mic up front: one permission prompt, and it powers the
-    // level meter. Only a refusal stops us; anything else, carry on
-    // without the meter.
-    try {
-      startMeter(await navigator.mediaDevices.getUserMedia({ audio: true }));
-    } catch (err) {
-      if ((err as DOMException)?.name === "NotAllowedError") {
-        setError(BLOCKED);
-        return;
-      }
-    }
+    let latest = "";
+    let delivered = false;
+    const deliver = () => {
+      if (delivered || !latest) return;
+      delivered = true;
+      handlers.current.onFinal(latest);
+    };
 
     const recognition = new Ctor();
     recognition.lang = navigator.language || "en-US";
@@ -123,16 +123,21 @@ export const useVoiceInput = (options: VoiceInputOptions) => {
         transcript += e.results[i][0].transcript;
         if (e.results[i].isFinal) isFinal = true;
       }
-      transcript = transcript.trim();
-      if (isFinal) handlers.current.onFinal(transcript);
-      else handlers.current.onInterim(transcript);
+      latest = transcript.trim();
+      if (isFinal) deliver();
+      else handlers.current.onInterim(latest);
     };
     recognition.onerror = (e) => {
+      // Keep whatever was heard before the error
+      if (latest) return;
       if (e.error !== "aborted") {
         setError(VOICE_ERRORS[e.error] ?? "Voice input stopped unexpectedly.");
       }
     };
     recognition.onend = () => {
+      // Phones often end the session without ever marking a result final:
+      // fall back to the last thing we heard
+      deliver();
       recognitionRef.current = null;
       stopMeter();
       setListening(false);
@@ -143,8 +148,20 @@ export const useVoiceInput = (options: VoiceInputOptions) => {
       setListening(true);
     } catch {
       recognitionRef.current = null;
-      stopMeter();
       setError("Couldn't start voice input.");
+      return;
+    }
+
+    // Level meter for the orb, desktop only: on phones a second microphone
+    // stream can starve the recogniser, so the orb just pulses instead
+    if (window.matchMedia("(pointer: fine)").matches && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          if (recognitionRef.current === recognition) startMeter(stream);
+          else stream.getTracks().forEach((track) => track.stop());
+        })
+        .catch(() => {});
     }
   }, [startMeter, stopMeter]);
 

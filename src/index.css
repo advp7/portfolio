@@ -513,7 +513,8 @@ html.custom-cursor [contenteditable="true"] {
   .orb::before,
   .orb::after,
   .mic-ring,
-  .ai-word {
+  .ai-word,
+  .voice-bar {
     animation: none;
   }
   .orb {
@@ -670,6 +671,36 @@ html.custom-cursor [contenteditable="true"] {
 .voice-bar {
   height: calc(4px + var(--level, 0) * 20px * var(--f));
   transition: height 80ms linear;
+}
+/* Phones have no level meter (it would compete with the recogniser for
+   the mic), so the bars ripple on their own while listening */
+@media (pointer: coarse) {
+  .voice-bar {
+    height: 16px;
+    transform-origin: center;
+    animation: voice-ripple 1s ease-in-out infinite;
+  }
+  .voice-bar:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .voice-bar:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+  .voice-bar:nth-child(4) {
+    animation-delay: 0.36s;
+  }
+  .voice-bar:nth-child(5) {
+    animation-delay: 0.48s;
+  }
+}
+@keyframes voice-ripple {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
 }
 .mic-ring {
   box-shadow: 0 0 0 0 rgb(var(--accent) / 0.5);
