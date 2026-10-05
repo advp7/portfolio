@@ -161,9 +161,9 @@ const Hero = () => {
             I build polished web and mobile products with React and React
             Native — and ship the Java and Python services behind them.
             Currently at Engati, building AI agents for customer experience —
-            my work reaches 100+ businesses on the platform, and the AI
-            assistant I built runs in production at Edelweiss. Earlier, I built
-            tools used by teams at Swiggy and Zomato.
+            my work reaches 100+ businesses on the platform, including
+            Edelweiss, where the AI assistant I built runs in production.
+            Earlier, I built tools used by teams at Swiggy and Zomato.
           </motion.p>
 
           <motion.div
