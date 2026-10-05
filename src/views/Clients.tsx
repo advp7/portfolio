@@ -85,11 +85,11 @@ const Clients = () => {
   return (
     <section
       id="clients"
-      aria-label="Brands and teams that have used software I built"
+      aria-label="Brands that have used my work"
       className="relative border-t border-stroke py-14 overflow-hidden"
     >
       <p className="text-center font-mono text-sm tracking-[0.2em] uppercase text-textMuted mb-10">
-        Software I built, used by
+        Brands that have used my work
       </p>
 
       <div
@@ -100,7 +100,7 @@ const Clients = () => {
           style={{ x }}
           className="flex w-max items-center gap-20 pr-20"
         >
-          {marqueeItems.map((client, index) => (
+          {marqueeItems.map((client, index) => [
             <img
               key={`${client.name}-${index}`}
               src={client.img}
@@ -112,8 +112,18 @@ const Clients = () => {
               className={`h-12 sm:h-14 w-auto max-w-[140px] object-contain opacity-60 ${
                 client.invertOnDark ? "invert-on-dark" : ""
               } hover:opacity-100 transition-opacity duration-300`}
-            />
-          ))}
+            />,
+            // After each full set of logos: the scale beyond named brands,
+            // without borrowing other companies' logos
+            index % clients.length === clients.length - 1 && (
+              <span
+                key={`scale-${index}`}
+                className="shrink-0 whitespace-nowrap font-display text-lg sm:text-xl font-semibold text-textSecondary"
+              >
+                <span className="gradient-text">100+</span> businesses on Engati
+              </span>
+            ),
+          ])}
         </motion.div>
       </div>
     </section>
