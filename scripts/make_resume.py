@@ -128,11 +128,11 @@ story = [
 
 story += heading("Summary")
 story.append(Paragraph(
-    "Frontend engineer with <b>4+ years</b> shipping production web and mobile products in "
-    "<b>React, React Native and TypeScript</b>, now building <b>AI-powered customer-experience "
-    "products</b> on a conversational-AI platform. Works across the stack — shipping backend "
-    "services in <b>Java (Spring Boot)</b> and <b>Python (FastAPI)</b> alongside the frontend. "
-    "Promoted to Senior in <b>10 months</b> and selected for Engati's bar-raisers program.",
+    "Frontend engineer with <b>4+ years</b> shipping web and mobile products in <b>React, React "
+    "Native and TypeScript</b>, working across the stack in <b>Java (Spring Boot)</b> and "
+    "<b>Python (FastAPI)</b>. At Engati, building <b>AI agents for customer experience</b> — work "
+    "that reaches <b>100+ businesses</b>, incl. an AI assistant in production at <b>Edelweiss</b>. "
+    "Earlier built tools used by teams at Swiggy and Zomato. Promoted to Senior in <b>10 months</b>.",
     body,
 ))
 
@@ -179,8 +179,8 @@ story.append(job(
         "and founders.",
         "Delivered across web (<b>React</b>) and mobile (<b>React Native</b>), from Figma handoff to production "
         "deploys on <b>AWS</b>.",
-        "Translated intricate UI designs into responsive interfaces across multiple external client projects "
-        "under strict timelines.",
+        "Translated intricate UI designs into responsive interfaces across external client projects "
+        "on tight timelines.",
     ],
 ))
 story.append(job(
