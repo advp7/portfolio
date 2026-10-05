@@ -409,41 +409,81 @@ const useSmoothedText = (text: string, enabled: boolean) => {
   return enabled ? Math.min(shown, text.length) : text.length;
 };
 
-const THINKING_STEPS = [
-  "Thinking",
-  "Looking through Advaith's work",
-  "Pulling it together",
+// ------------------------------------------------------ loading states
+
+/** How long a reply can take before the loader appears at all, so quick
+ *  answers go straight to text without a flash of "Thinking…" */
+const LOADER_DELAY_MS = 300;
+/** Only slow answers get these, in order */
+const SLOW_STEPS: { after: number; text: string }[] = [
+  { after: 3500, text: "Still on it" },
+  { after: 7000, text: "Almost there" },
 ];
 
+/** Greetings, thanks and "who are you" get a wordless loader */
+const SMALL_TALK =
+  /^(hi|hey|hello|hiya|yo|sup|namaste|hola|good (morning|afternoon|evening|night)|thanks|thank you|thx|cheers|cool|nice|great|awesome|ok|okay|bye|goodbye|see ya)\b|how are you|how('?s| is) it going|what'?s up|who are you|are you (an? )?(ai|bot|robot|human|real)/i;
+
+/** First match wins, so the order matters. Kept short enough to fit a
+ *  320px phone on one line. */
+const LOADING_RULES: [RegExp, string][] = [
+  [/\b(hobb|outside (of )?work|free time|weekend|f1|formula|football|gym|fitness|running|photograph|interests?|passion|fun fact)/i, "Looking beyond work"],
+  [/\b(e-?mail|contact|reach|touch|hire|hiring|resume|cv|linkedin|availab|interview|notice|relocat|remote|opportunit)/i, "Finding how to reach him"],
+  [/\b(project|built|build|case stud|ellie|edelweiss|rcs|google|win|proud|impressive|achiev|portfolio|assistant|this site)/i, "Pulling up his work"],
+  [/\b(skill|stack|react|typescript|javascript|front-?end|back-?end|full[- ]?stack|java|python|fastapi|spring|redis|aws|tech|ai\b|llm|gemini|mobile|native|tools?)/i, "Checking his stack"],
+  [/\b(experience|engati|infinitybox|privafy|work|job|role|career|promot|senior|award|recogni|education|college|degree|stud(y|ied)|school|graduat|universit|years)/i, "Checking his experience"],
+];
+
+/** The opening loader text for a question; null means wordless */
+const loadingPhraseFor = (question: string): string | null => {
+  const q = question.trim();
+  if (q.split(/\s+/).length <= 8 && SMALL_TALK.test(q)) return null;
+  return LOADING_RULES.find(([pattern]) => pattern.test(q))?.[1] ?? "Thinking";
+};
+
 /**
- * Shown until the first words arrive: one shimmering line whose phrase
- * changes with the same blur-fade the reply's words use. The orb beside it
- * carries the motion, so there's nothing else competing for attention.
+ * Shown until the first words arrive. It appears only if the answer isn't
+ * instant, opens with a phrase that fits the question (or no words for
+ * small talk), and only moves on if the wait actually drags. Phrases change
+ * with the same blur-fade the reply's words use.
  */
-const ThinkingIndicator = () => {
-  const [step, setStep] = useState(0);
+const ThinkingIndicator = ({ phrase }: { phrase: string | null }) => {
+  const [shown, setShown] = useState(false);
+  const [slowStep, setSlowStep] = useState(-1);
   useEffect(() => {
-    const id = window.setInterval(
-      () => setStep((s) => Math.min(s + 1, THINKING_STEPS.length - 1)),
-      1800
-    );
-    return () => window.clearInterval(id);
+    const timers = [
+      window.setTimeout(() => setShown(true), LOADER_DELAY_MS),
+      ...SLOW_STEPS.map((step, i) =>
+        window.setTimeout(() => setSlowStep(i), step.after)
+      ),
+    ];
+    return () => timers.forEach(window.clearTimeout);
   }, []);
+
+  const label = slowStep >= 0 ? `${SLOW_STEPS[slowStep].text}…` : phrase ? `${phrase}…` : null;
 
   return (
     // Same size and line height as reply text, so nothing shifts on handoff
-    <div role="status" className="relative h-[1.625em] overflow-hidden">
+    <div
+      role="status"
+      aria-label={label ?? "Typing"}
+      className="relative h-[1.625em] overflow-hidden"
+    >
       <AnimatePresence initial={false}>
-        <motion.span
-          key={step}
-          initial={{ opacity: 0, y: "40%", filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: "0%", filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: "-40%", filter: "blur(4px)" }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="ai-shimmer absolute inset-x-0 top-0 whitespace-nowrap"
-        >
-          {THINKING_STEPS[step]}…
-        </motion.span>
+        {shown && (
+          <motion.span
+            key={label ?? "dots"}
+            initial={{ opacity: 0, y: "40%", filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: "0%", filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: "-40%", filter: "blur(4px)" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className={`ai-shimmer absolute inset-x-0 top-0 whitespace-nowrap ${
+              label ? "" : "tracking-[0.35em]"
+            }`}
+          >
+            {label ?? "•••"}
+          </motion.span>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -456,12 +496,15 @@ const ThinkingIndicator = () => {
  */
 const AssistantReply = ({
   text,
+  question,
   streaming,
   verifying,
   waiting,
   children,
 }: {
   text: string;
+  /** What the visitor asked, so the loader can fit it */
+  question: string;
   streaming: boolean;
   /** The human check is waiting on the visitor */
   verifying: boolean;
@@ -491,7 +534,7 @@ const AssistantReply = ({
                 tick it to continue.
               </p>
             ) : (
-              <ThinkingIndicator />
+              <ThinkingIndicator phrase={loadingPhraseFor(question)} />
             )}
           </motion.div>
         ) : visible ? (
@@ -1139,7 +1182,7 @@ const AskAdvaith = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-5 pt-2 text-sm leading-relaxed">
-                  {messages.map((message) =>
+                  {messages.map((message, index) =>
                     message.role === "user" ? (
                       <motion.div
                         key={message.id}
@@ -1175,6 +1218,7 @@ const AskAdvaith = () => {
                           ) : (
                           <AssistantReply
                             text={message.text}
+                            question={messages[index - 1]?.text ?? ""}
                             streaming={message.status === "streaming"}
                             verifying={verifying}
                             waiting={message.status === "streaming" && !message.text}
