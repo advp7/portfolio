@@ -6,6 +6,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -55,6 +56,8 @@ interface Message {
   excluded?: boolean;
   /** Worker's signature for this reply, sent back with the history */
   sig?: string;
+  /** The model replied with only tool calls; text was filled in for it */
+  actionsOnly?: boolean;
 }
 
 const MAX_MESSAGES = 20;
@@ -927,7 +930,12 @@ const AskAdvaith = () => {
       await attempt(true);
       const finalText =
         reply || (replyActions.length ? describeActions(replyActions) : "…");
-      patch(replyId, (m) => ({ ...m, status: "done", text: finalText }));
+      patch(replyId, (m) => ({
+        ...m,
+        status: "done",
+        text: finalText,
+        actionsOnly: !reply && replyActions.length > 0,
+      }));
       if (speakRepliesRef.current) speakReply(cleanToolText(finalText));
     } catch (err) {
       if (controller.signal.aborted) {
@@ -1013,6 +1021,27 @@ const AskAdvaith = () => {
   };
 
   const atLimit = messages.length >= MAX_MESSAGES;
+
+  // A case study card is shown once per conversation; later repeats are
+  // dropped (unless the card is all that reply has)
+  const visibleActions = useMemo(() => {
+    const shown = new Set<string>();
+    const byMessage = new Map<number, AssistantAction[]>();
+    for (const message of messages) {
+      if (message.role !== "assistant") continue;
+      const actions = actionsOf(message).filter(
+        (a) =>
+          a.name !== "open_case_study" ||
+          message.actionsOnly ||
+          !shown.has(a.args.id)
+      );
+      actions
+        .filter((a) => a.name === "open_case_study")
+        .forEach((a) => shown.add(a.args.id));
+      byMessage.set(message.id, actions);
+    }
+    return byMessage;
+  }, [messages]);
   const latest = messages[messages.length - 1];
   const awaitingFirstToken =
     busy && latest?.role === "assistant" && !latest.text && !latest.actions.length;
@@ -1285,9 +1314,9 @@ const AskAdvaith = () => {
                             verifying={verifying}
                             waiting={message.status === "streaming" && !message.text}
                           >
-                          {actionsOf(message).some((a) => a.name !== "suggest_replies") && (
+                          {(visibleActions.get(message.id) ?? []).some((a) => a.name !== "suggest_replies") && (
                             <div className="flex flex-wrap gap-2">
-                              {actionsOf(message)
+                              {(visibleActions.get(message.id) ?? [])
                                 .filter((a) => a.name !== "suggest_replies")
                                 .map((action, i) => (
                                   <ActionView
@@ -1305,7 +1334,7 @@ const AskAdvaith = () => {
                             !busy &&
                             !atLimit && (
                               <div className="flex flex-wrap gap-2 pt-1">
-                                {actionsOf(message)
+                                {(visibleActions.get(message.id) ?? [])
                                   .filter((a) => a.name === "suggest_replies")
                                   .flatMap((a) => (a.args.questions ?? "").split("\n"))
                                   .filter(Boolean)
