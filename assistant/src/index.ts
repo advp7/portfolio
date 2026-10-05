@@ -132,6 +132,30 @@ const json = (body: unknown, status: number, headers: HeadersInit = {}) =>
 
 class BodyTooLarge extends Error {}
 
+// ------------------------------------------------------------- observability
+// One structured entry per exchange, searchable in Workers Logs
+// (Workers & Pages -> chat -> Logs). No IPs; emails and phone numbers are
+// masked before anything is written.
+
+const redact = (text: string) =>
+  text
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
+    .replace(/\+?\d[\d\s().-]{7,}\d/g, "[phone]");
+
+const clip = (text: string, max: number) =>
+  text.length > max ? `${text.slice(0, max)}…` : text;
+
+const logEvent = (entry: Record<string, unknown>) => console.log(entry);
+
+const countryOf = (request: Request) =>
+  (request as Request & { cf?: { country?: string } }).cf?.country ?? "unknown";
+
+/** Stable per-conversation id for grouping logs, not reversible */
+const sessionTag = async (session: unknown) =>
+  typeof session === "string"
+    ? b64url(await crypto.subtle.digest("SHA-256", encoder.encode(session))).slice(0, 10)
+    : "none";
+
 /** Reads the body as text, refusing anything over `max` bytes without
  *  buffering it all first (Content-Length can be absent or a lie) */
 const readBody = async (request: Request, max: number) => {
@@ -343,7 +367,7 @@ const verifyTurnstile = async (
 const parseMessages = async (
   env: Env,
   value: unknown
-): Promise<ChatMessage[] | null> => {
+): Promise<{ messages: ChatMessage[]; dropped: number } | null> => {
   if (!Array.isArray(value) || value.length === 0) return null;
   if (value.length > MAX_MESSAGES) return null;
   const incoming: (ChatMessage & { sig?: unknown })[] = [];
@@ -363,20 +387,22 @@ const parseMessages = async (
   // Keep only assistant turns we actually wrote. A forged one is dropped
   // along with the question it claims to answer.
   const messages: ChatMessage[] = [];
+  let dropped = 0;
   for (const m of incoming) {
     if (m.role === "user") {
       messages.push({ role: "user", text: m.text });
     } else if (await replyIsOurs(env, m.text, m.sig)) {
       messages.push({ role: "assistant", text: m.text });
-    } else if (messages[messages.length - 1]?.role === "user") {
-      messages.pop();
+    } else {
+      dropped++;
+      if (messages[messages.length - 1]?.role === "user") messages.pop();
     }
   }
 
   // Gemini needs the history to start with a user turn
   const recent = messages.slice(-HISTORY_WINDOW);
   while (recent.length && recent[0].role !== "user") recent.shift();
-  return recent;
+  return { messages: recent, dropped };
 };
 
 /** Only pass through tool calls with arguments we recognise */
@@ -427,7 +453,8 @@ const toAction = (call: {
 const streamGemini = async (
   env: Env,
   messages: ChatMessage[],
-  emit: Emit
+  emit: Emit,
+  onUsage?: (usage: { promptTokenCount?: number; candidatesTokenCount?: number }) => void
 ): Promise<"ok" | "empty" | "unavailable"> => {
   if (!env.GEMINI_API_KEY) return "unavailable";
   let produced = false;
@@ -469,6 +496,7 @@ const streamGemini = async (
       } catch {
         continue;
       }
+      if (chunk?.usageMetadata) onUsage?.(chunk.usageMetadata);
       const parts: any[] = chunk?.candidates?.[0]?.content?.parts ?? [];
       for (const part of parts) {
         if (typeof part.text === "string" && part.text && !part.thought) {
@@ -541,7 +569,10 @@ const handleSession = async (
   }
   const ipKey = clientKey(ip);
   const { success } = await env.SESSION_LIMITER.limit({ key: ipKey });
-  if (!success) return json({ error: "rate_limited" }, 429, cors);
+  if (!success) {
+    logEvent({ event: "session_rejected", reason: "rate_limited", country: countryOf(request) });
+    return json({ error: "rate_limited" }, 429, cors);
+  }
 
   let body: { token?: unknown } | null = null;
   try {
@@ -554,6 +585,7 @@ const handleSession = async (
     return json({ error: "bad_request" }, 400, cors);
   }
   if (!(await verifyTurnstile(env, token, ip, allowedHosts))) {
+    logEvent({ event: "session_rejected", reason: "verification_failed", country: countryOf(request) });
     return json({ error: "verification_failed" }, 403, cors);
   }
   return json(await issueSession(env, ipKey), 200, cors);
@@ -567,30 +599,32 @@ const handleChat = async (
   cors: Record<string, string>
 ) => {
   const ipKey = clientKey(ip);
+  const country = countryOf(request);
+  const reject = (reason: string, status: number) => {
+    logEvent({ event: "chat_rejected", reason, country });
+    return json({ error: reason }, status, cors);
+  };
   const { success } = await env.CHAT_LIMITER.limit({ key: ipKey });
-  if (!success) return json({ error: "rate_limited" }, 429, cors);
+  if (!success) return reject("rate_limited", 429);
 
   let body: { session?: unknown; messages?: unknown };
   try {
     body = JSON.parse(await readBody(request, MAX_BODY_BYTES));
   } catch (err) {
     return err instanceof BodyTooLarge
-      ? json({ error: "too_large" }, 413, cors)
-      : json({ error: "bad_request" }, 400, cors);
+      ? reject("too_large", 413)
+      : reject("bad_request", 400);
   }
-  if (!body || typeof body !== "object") {
-    return json({ error: "bad_request" }, 400, cors);
-  }
+  if (!body || typeof body !== "object") return reject("bad_request", 400);
   if (
     !env.TURNSTILE_SECRET_KEY ||
     !(await verifySession(env, body.session, ipKey))
   ) {
-    return json({ error: "session_expired" }, 401, cors);
+    return reject("session_expired", 401);
   }
-  const messages = await parseMessages(env, body.messages);
-  if (!messages || !messages.length) {
-    return json({ error: "bad_request" }, 400, cors);
-  }
+  const parsed = await parseMessages(env, body.messages);
+  if (!parsed || !parsed.messages.length) return reject("bad_request", 400);
+  const { messages, dropped } = parsed;
 
   const { readable, writable } = new TransformStream<Uint8Array>();
   const writer = writable.getWriter();
@@ -601,31 +635,69 @@ const handleChat = async (
       .catch(() => {});
   };
   // Everything we say is collected so the finished reply can be signed
+  // (and logged)
   let replyText = "";
+  const startedAt = Date.now();
+  let firstAt = 0;
+  const tools: string[] = [];
   const emit: Emit = (event) => {
+    if (!firstAt && (event.type === "text" || event.type === "action")) {
+      firstAt = Date.now();
+    }
     if (event.type === "text") replyText += event.text;
+    if (event.type === "action" && event.name !== "suggest_replies") {
+      tools.push([event.name, ...Object.values(event.args)].join(":"));
+    }
     send(event);
   };
+  let usage: { promptTokenCount?: number; candidatesTokenCount?: number } = {};
 
   ctx.waitUntil(
     (async () => {
       let provider: Provider = "gemini";
+      let outcome = "ok";
       try {
-        const result = await streamGemini(env, messages, emit);
+        const result = await streamGemini(env, messages, emit, (u) => {
+          usage = u;
+        });
         if (result === "empty") {
+          outcome = "blocked_or_empty";
           emit({ type: "text", text: OFF_TOPIC_REPLY });
         } else if (result === "unavailable") {
           provider = "workers-ai";
+          outcome = "fallback";
           if (!(await streamWorkersAi(env, messages, emit))) {
             provider = "static";
+            outcome = "static_reply";
             emit({ type: "text", text: STATIC_REPLY });
           }
         }
+      } catch (err) {
+        outcome = "error";
+        console.error("chat failed", err);
       } finally {
         const finalText = replyText.trim();
         const sig = finalText ? await signReply(env, finalText) : undefined;
         send({ type: "done", provider, ...(sig ? { sig } : {}) });
         await writer.close().catch(() => {});
+
+        const question = messages[messages.length - 1]?.text ?? "";
+        logEvent({
+          event: "chat",
+          session: await sessionTag(body.session),
+          turn: messages.filter((m) => m.role === "user").length,
+          question: clip(redact(question), 500),
+          reply: clip(redact(finalText), 1500),
+          provider,
+          outcome,
+          tools,
+          firstWordMs: firstAt ? firstAt - startedAt : null,
+          totalMs: Date.now() - startedAt,
+          tokensIn: usage.promptTokenCount ?? null,
+          tokensOut: usage.candidatesTokenCount ?? null,
+          forgedTurnsDropped: dropped,
+          country,
+        });
       }
     })()
   );
