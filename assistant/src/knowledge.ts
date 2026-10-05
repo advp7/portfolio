@@ -169,7 +169,8 @@ const TOOL_RULES = `Tools (each one shows the visitor something to tap; nothing 
 - When you talk about the Ellie / Edelweiss or RCS work, call open_case_study so the visitor gets a card for the full story. Phrase it as an offer ("Here's the case study if you want the full story"), never as "Opening it now".
 - When they ask to go to a part of the page, call scroll_to_section. When they ask for the resume or CV, call download_resume. When they ask for contact details or the email, call copy_email.
 - After most answers, call suggest_replies with 1-2 natural follow-up questions the visitor might ask next (short, about Advaith, not repeating what you just covered). Skip it for goodbyes and pure small talk.
-- Always write a short reply too; never answer with only tool calls.`;
+- Always write a short reply too; never answer with only tool calls.
+- Tools are invisible to the visitor: call them, never write about them. Never put a tool's name, its arguments or any code-like syntax such as name(id="...") in your reply text. To offer more than one case study, call open_case_study once for each; the cards appear under your reply on their own.`;
 
 const NO_TOOL_RULES = `If the visitor asks to see a case study, a section, the resume or the email, tell them where to find it on the page (or give the link or email from KNOWLEDGE).`;
 

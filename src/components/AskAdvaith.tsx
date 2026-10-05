@@ -16,6 +16,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { caseStudies, socials } from "../data";
 // assistant
 import {
+  ActionName,
   AssistantAction,
   AssistantSession,
   ChatTurn,
@@ -167,6 +168,57 @@ const describeActions = (actions: AssistantAction[]) =>
       }
     })
     .join(" ");
+
+// ------------------------------------- tool calls written out as text
+// Safety net: the model is told to call tools, but now and then it writes
+// one out instead (`open_case_study(id="rcs")`). Those lines are hidden and
+// turned into the real, tappable action.
+
+const TOOL_NAMES = "open_case_study|scroll_to_section|download_resume|copy_email|suggest_replies";
+const TOOL_IN_LINE = new RegExp(`\\b(${TOOL_NAMES})\\s*\\(`);
+const TOOL_CALL = new RegExp(`\\b(${TOOL_NAMES})\\s*\\(([^)]*)\\)`, "g");
+/** Mid-stream, a tool name may still be half-typed at the very end */
+const TOOL_PREFIX_AT_END = /(^|\s)(open_|scroll_|download_|copy_|suggest_)\w*$/;
+
+const cleanToolText = (text: string) =>
+  text
+    .split("\n")
+    .filter((line) => !TOOL_IN_LINE.test(line))
+    .join("\n")
+    .replace(TOOL_PREFIX_AT_END, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trimEnd();
+
+const textActions = (text: string): AssistantAction[] => {
+  const found: AssistantAction[] = [];
+  TOOL_CALL.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = TOOL_CALL.exec(text))) {
+    const name = match[1] as ActionName;
+    const value = match[2].match(/["']([\w-]+)["']/)?.[1];
+    if (name === "open_case_study") {
+      if (value && caseStudies.some((s) => s.id === value)) {
+        found.push({ name, args: { id: value } });
+      }
+    } else if (name === "scroll_to_section") {
+      if (value && SECTION_LABELS[value]) found.push({ name, args: { section: value } });
+    } else if (name === "download_resume" || name === "copy_email") {
+      found.push({ name, args: {} });
+    }
+  }
+  return found;
+};
+
+/** Real tool calls plus any rescued from the text, without duplicates */
+const actionsOf = (message: Message) => {
+  const seen = new Set<string>();
+  return [...message.actions, ...textActions(message.text)].filter((action) => {
+    const key = `${action.name}:${JSON.stringify(action.args)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
 
 // ------------------------------------------------------------ rich text
 
@@ -876,7 +928,7 @@ const AskAdvaith = () => {
       const finalText =
         reply || (replyActions.length ? describeActions(replyActions) : "…");
       patch(replyId, (m) => ({ ...m, status: "done", text: finalText }));
-      if (speakRepliesRef.current) speakReply(finalText);
+      if (speakRepliesRef.current) speakReply(cleanToolText(finalText));
     } catch (err) {
       if (controller.signal.aborted) {
         patch(replyId, (m) => ({ ...m, status: "done", excluded: true }));
@@ -1227,15 +1279,15 @@ const AskAdvaith = () => {
                             </motion.div>
                           ) : (
                           <AssistantReply
-                            text={message.text}
+                            text={cleanToolText(message.text)}
                             question={messages[index - 1]?.text ?? ""}
                             streaming={message.status === "streaming"}
                             verifying={verifying}
                             waiting={message.status === "streaming" && !message.text}
                           >
-                          {message.actions.some((a) => a.name !== "suggest_replies") && (
+                          {actionsOf(message).some((a) => a.name !== "suggest_replies") && (
                             <div className="flex flex-wrap gap-2">
-                              {message.actions
+                              {actionsOf(message)
                                 .filter((a) => a.name !== "suggest_replies")
                                 .map((action, i) => (
                                   <ActionView
@@ -1253,7 +1305,7 @@ const AskAdvaith = () => {
                             !busy &&
                             !atLimit && (
                               <div className="flex flex-wrap gap-2 pt-1">
-                                {message.actions
+                                {actionsOf(message)
                                   .filter((a) => a.name === "suggest_replies")
                                   .flatMap((a) => (a.args.questions ?? "").split("\n"))
                                   .filter(Boolean)
