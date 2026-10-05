@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/portfolio/static/css/main.2388e91f.css",
-    "main.js": "/portfolio/static/js/main.601cf257.js",
-    "static/js/426.98da6364.chunk.js": "/portfolio/static/js/426.98da6364.chunk.js",
-    "static/js/899.c6e62511.chunk.js": "/portfolio/static/js/899.c6e62511.chunk.js",
-    "static/js/231.55c6f2b0.chunk.js": "/portfolio/static/js/231.55c6f2b0.chunk.js",
+    "main.css": "/portfolio/static/css/main.1d31a24b.css",
+    "main.js": "/portfolio/static/js/main.00a7064d.js",
+    "static/js/426.d73fbaea.chunk.js": "/portfolio/static/js/426.d73fbaea.chunk.js",
+    "static/js/899.c68b2b0b.chunk.js": "/portfolio/static/js/899.c68b2b0b.chunk.js",
+    "static/js/231.01388e09.chunk.js": "/portfolio/static/js/231.01388e09.chunk.js",
     "static/media/mamaketo.svg": "/portfolio/static/media/mamaketo.25d5bfce67c5a856b67a5238b666b918.svg",
     "static/media/edelweiss_logo.svg": "/portfolio/static/media/edelweiss_logo.a735fcdbb78c1f1320eba6873afa74cc.svg",
     "static/media/zomato.webp": "/portfolio/static/media/zomato.dca30c8f66b4b0ea90f8.webp",
@@ -19,7 +19,7 @@
     "static/media/download-btn-icon.svg": "/portfolio/static/media/download-btn-icon.db00ff1fa6f1d172b12f9e1441c6d79c.svg"
   },
   "entrypoints": [
-    "static/css/main.2388e91f.css",
-    "static/js/main.601cf257.js"
+    "static/css/main.1d31a24b.css",
+    "static/js/main.00a7064d.js"
   ]
 }
