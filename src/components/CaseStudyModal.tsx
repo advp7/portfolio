@@ -142,7 +142,7 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
                 ? { type: "spring", stiffness: 300, damping: 32 }
                 : { duration: 0.3, ease: "easeOut" }
             }
-            className="pointer-events-auto relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-panel
+            className="pointer-events-auto relative w-full max-w-3xl max-h-[92vh] overflow-y-auto overscroll-contain subtle-scroll bg-panel
             border border-stroke rounded-t-2xl sm:rounded-2xl shadow-[0_24px_80px_var(--shadow-modal)]
             pb-[env(safe-area-inset-bottom,0px)]"
           >
@@ -222,7 +222,7 @@ const CaseStudyModal: FC<CaseStudyModalProps> = ({
 
               <Section title="How it's built">
                 <div className="rounded-xl border border-stroke bg-night/60 p-3 sm:p-5">
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto subtle-scroll">
                     <ArchitectureDiagram id={study.diagram} />
                   </div>
                   <p className="mt-2 flex items-center gap-2 text-xs text-textMuted">
