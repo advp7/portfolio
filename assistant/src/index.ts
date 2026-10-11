@@ -106,7 +106,7 @@ const TOOLS = [
           type: "ARRAY",
           items: { type: "STRING" },
           description:
-            "1-2 follow-ups written as the visitor would ask them, about Advaith, each under 8 words.",
+            "1-2 follow-ups written as the visitor would ask them, about Advaith, each under 8 words. Each must ask for something not already answered or shown in this conversation.",
         },
       },
       required: ["questions"],

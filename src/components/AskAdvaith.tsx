@@ -177,6 +177,15 @@ const describeActions = (actions: AssistantAction[]) =>
 // one out instead (`open_case_study(id="rcs")`). Those lines are hidden and
 // turned into the real, tappable action.
 
+/** Once one of these cards has been shown, follow-ups asking for it again are noise */
+const COVERED_BY: Record<string, RegExp> = {
+  copy_email: /\b(e-?mail|contact|get in touch|reach (him|out))\b/i,
+  download_resume: /\b(resume|résumé|cv)\b/i,
+};
+
+const normalizeQuestion = (text: string) =>
+  text.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+
 const TOOL_NAMES = "open_case_study|scroll_to_section|download_resume|copy_email|suggest_replies";
 const TOOL_IN_LINE = new RegExp(`\\b(${TOOL_NAMES})\\s*\\(`);
 const TOOL_CALL = new RegExp(`\\b(${TOOL_NAMES})\\s*\\(([^)]*)\\)`, "g");
@@ -1023,22 +1032,46 @@ const AskAdvaith = () => {
   const atLimit = messages.length >= MAX_MESSAGES;
 
   // A case study card is shown once per conversation; later repeats are
-  // dropped (unless the card is all that reply has)
+  // dropped (unless the card is all that reply has). Follow-up chips that
+  // ask for something already given (the email, the resume) or already
+  // asked are dropped too.
   const visibleActions = useMemo(() => {
     const shown = new Set<string>();
+    const asked = new Set<string>();
+    const covered: RegExp[] = [];
     const byMessage = new Map<number, AssistantAction[]>();
     for (const message of messages) {
-      if (message.role !== "assistant") continue;
+      if (message.role === "user") {
+        asked.add(normalizeQuestion(message.text));
+        continue;
+      }
       const actions = actionsOf(message).filter(
         (a) =>
           a.name !== "open_case_study" ||
           message.actionsOnly ||
           !shown.has(a.args.id)
       );
-      actions
-        .filter((a) => a.name === "open_case_study")
-        .forEach((a) => shown.add(a.args.id));
-      byMessage.set(message.id, actions);
+      for (const a of actions) {
+        if (a.name === "open_case_study") shown.add(a.args.id);
+        const topic = COVERED_BY[a.name];
+        if (topic) covered.push(topic);
+      }
+      byMessage.set(
+        message.id,
+        actions.flatMap((a) => {
+          if (a.name !== "suggest_replies") return [a];
+          const questions = (a.args.questions ?? "")
+            .split("\n")
+            .filter(
+              (q) =>
+                !asked.has(normalizeQuestion(q)) &&
+                !covered.some((topic) => topic.test(q))
+            );
+          return questions.length
+            ? [{ ...a, args: { ...a.args, questions: questions.join("\n") } }]
+            : [];
+        })
+      );
     }
     return byMessage;
   }, [messages]);
